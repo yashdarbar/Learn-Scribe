@@ -1,3 +1,4 @@
+// eslint-disable-file @typescript-eslint/no-unused-vars
 "use client";
 
 import { GalleryVerticalEnd } from "lucide-react"
