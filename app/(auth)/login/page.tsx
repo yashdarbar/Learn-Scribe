@@ -52,7 +52,7 @@ export default function SignIn() {
     if (error) {
       // Convert technical errors to user-friendly messages
       console.log(error)
-      const userMessage = getFriendlyErrorMessage(error)
+      const userMessage = getFriendlyErrorMessage(error.message)
       // console.log(error)
       toast.error(userMessage)
       return
