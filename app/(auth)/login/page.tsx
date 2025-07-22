@@ -6,7 +6,6 @@ import { AuthForm } from "@/components/auth-form"
 import { supabaseBrowser } from "@/lib/supabase-browser"
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import Link from "next/link";
 
 interface AuthFormData {
   name?: string
