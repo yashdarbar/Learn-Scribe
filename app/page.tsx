@@ -1,4 +1,5 @@
 "use client";
+import { HeroSection } from "@/components/hero-section";
 // import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
@@ -105,7 +106,8 @@ export default function Home() {
     //   </footer>
     // </div>
     <div>
-      <Button onClick={clickHandler}>Blog Craft</Button>
+      {/* <Button onClick={clickHandler}>Blog Craft</Button> */}
+      <HeroSection/>
     </div>
   );
 }
