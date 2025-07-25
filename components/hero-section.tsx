@@ -1,7 +1,8 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { ChevronRight } from "lucide-react"
-import Link from "next/link" // Add this import
+import Link from "next/link"
+import Image from "next/image" // Add this import
 
 interface HeroSectionProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string
@@ -61,7 +62,7 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
       },
       description = "Write better blogs with AI assistance and turn any PDF into an interactive learning experience. Create, learn, and publish with intelligence.",
       ctaText = "Explore",
-      ctaHref = "/login", // Changed default to /login
+      ctaHref = "/login",
       bottomImage = "https://farmui.vercel.app/dashboard.png",
       gridOptions,
       ...props
@@ -104,10 +105,13 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
             </div>
             {bottomImage && (
               <div className="mt-32 mx-10 relative z-10">
-                <img
+                <Image
                   src={bottomImage}
-                  className="w-full shadow-lg rounded-lg border border-gray-800"
                   alt="Dashboard preview"
+                  width={1200}
+                  height={600}
+                  className="w-full shadow-lg rounded-lg border border-gray-800"
+                  priority
                 />
               </div>
             )}
