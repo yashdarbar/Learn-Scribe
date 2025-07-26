@@ -8,7 +8,8 @@ import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { supabaseBrowser } from "@/lib/supabase-browser"
+// import { createClient } from "@/lib/supabase-browser"/
+import { createClient } from "@/utils/supabase/client"
 import { useState } from "react"
 
 const mockUser = {
@@ -36,7 +37,7 @@ const RetroGrid = ({ angle = 65, cellSize = 60, opacity = 0.3, lineColor = "rgba
 
 export default function Dashboard() {
   const router = useRouter()
-  const supabase = supabaseBrowser()
+  const supabase = createClient()
   const [loading, setLoading] = useState(false)
 
   const handleLogout = async () => {

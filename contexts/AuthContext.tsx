@@ -1,7 +1,8 @@
 // contexts/AuthContext.tsx
 'use client'
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { supabaseBrowser } from '@/lib/supabase-browser'
+// import { supabaseBrowser } from '@/lib/supabase-browser'
+import { createClient } from '@/utils/supabase/client'
 import { User, Session } from '@supabase/auth-helpers-nextjs'
 import { AuthContextType } from '@/types/auth'
 
@@ -19,7 +20,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  const supabase = supabaseBrowser()
+  // const supabase = supabaseBrowser()
+  const supabase = createClient()
 
   useEffect(() => {
     const getSession = async (): Promise<void> => {

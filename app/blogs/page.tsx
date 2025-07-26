@@ -5,6 +5,26 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
+// import { useState } from "react";
+
+// --- RetroGrid copied from dashboard ---
+const RetroGrid = ({ angle = 65, cellSize = 60, opacity = 0.3, lineColor = "rgba(120,119,198,0.3)" }) => {
+  const gridStyles = {
+    "--grid-angle": `${angle}deg`,
+    "--cell-size": `${cellSize}px`,
+    "--opacity": opacity,
+    "--line-color": lineColor,
+  } as React.CSSProperties;
+
+  return (
+    <div className="pointer-events-none absolute size-full overflow-hidden [perspective:200px]" style={{ opacity }}>
+      <div className="absolute inset-0 [transform:rotateX(var(--grid-angle))]" style={gridStyles}>
+        <div className="animate-grid [background-image:linear-gradient(to_right,var(--line-color)_1px,transparent_0),linear-gradient(to_bottom,var(--line-color)_1px,transparent_0)] [background-repeat:repeat] [background-size:var(--cell-size)_var(--cell-size)] [height:300vh] [inset:0%_0px] [margin-left:-200%] [transform-origin:100%_0_0] [width:600vw]" />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent to-90%" />
+    </div>
+  );
+};
 
 const mockBlogs = [
   {
@@ -56,12 +76,14 @@ const mockBlogs = [
 
 export default function BlogsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center py-8 px-2">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center py-8 px-2">
+      <RetroGrid />
+      <div className="absolute top-0 z-[0] h-screen w-screen bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
       <motion.div
         initial={{ opacity: 0, y: 32 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
-        className="w-full max-w-6xl"
+        className="w-full max-w-6xl relative z-10"
       >
         <Card className="backdrop-blur-xl bg-black/30 border border-white/10 rounded-2xl shadow-xl p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">

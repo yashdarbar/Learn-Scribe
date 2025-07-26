@@ -3,7 +3,8 @@
 
 import { GalleryVerticalEnd } from "lucide-react"
 import { AuthForm } from "@/components/auth-form"
-import { supabaseBrowser } from "@/lib/supabase-browser";
+// import { supabaseBrowser } from "@/lib/supabase-browser";
+import { createClient } from "@/utils/supabase/client"
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,7 +20,7 @@ export default function SignUpPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const supabase = supabaseBrowser();
+  const supabase = createClient();
 
   const handleSignup = async (formData: AuthFormData) => {
   const { email, password, name } = formData
