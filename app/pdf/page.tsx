@@ -13,11 +13,11 @@ import { useRouter } from "next/navigation";
 // import { uploadPDF, type UploadResult } from "@/app/actions/pdf-upload";
 import { PdfUploadModal } from "@/components/PdfUploadModal";
 
-// New interface for Next.js page props
-interface PageProps {
-  params?: Record<string, string | string[]>;
-  searchParams?: Record<string, string | string[] | undefined>;
-}
+// // New interface for Next.js page props
+// interface PageProps {
+//   params?: Record<string, string | string[]>;
+//   searchParams?: Record<string, string | string[] | undefined>;
+// }
 
 
 // // Define the props interface
@@ -77,7 +77,7 @@ const mockPDFs = [
 ];
 
 // Main component - DEFAULT EXPORT
-export default function PdfLibraryPage({params, searchParams}: PageProps) {
+export default function PdfLibraryPage() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const router = useRouter();
 
