@@ -12,6 +12,13 @@ import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { uploadPDF, type UploadResult } from "@/app/actions/pdf-upload";
 
+// New interface for Next.js page props
+interface PageProps {
+  params?: Record<string, string | string[]>;
+  searchParams?: Record<string, string | string[] | undefined>;
+}
+
+
 // Define the props interface
 interface PdfUploadModalProps {
   open: boolean;
@@ -69,7 +76,7 @@ const mockPDFs = [
 ];
 
 // Main component - DEFAULT EXPORT
-export default function PdfLibraryPage() {
+export default function PdfLibraryPage({params, searchParams}: PageProps) {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const router = useRouter();
 
@@ -109,7 +116,7 @@ export default function PdfLibraryPage() {
                   key={pdf.id}
                   whileHover={{ scale: 1.03, boxShadow: "0 4px 32px 0 rgba(0,0,0,0.15)" }}
                   transition={{ type: "spring", stiffness: 300 }}
-                  // onClick={() => router.push(`/pdf/${pdf.id}`)}
+                  onClick={() => router.push(`/pdf/${pdf.id}`)}
                   className="cursor-pointer"
                 >
                   <Card className="backdrop-blur-xl bg-black/20 border border-white/10 p-6 flex flex-col h-full transition-all">
@@ -246,13 +253,13 @@ export function PdfUploadModal({ open, onClose, onSuccess }: PdfUploadModalProps
         console.log('✅ Upload completed, PDF ID:', result.pdfId);
 
         // Auto-redirect after success
-        setTimeout(() => {
-          if (result.pdfId) {
-            onSuccess?.(result.pdfId);
-            onClose();
-            router.push(`/pdf/${result.pdfId}`);
-          }
-        }, 1500);
+        // setTimeout(() => {
+        //   if (result.pdfId) {
+        //     onSuccess?.(result.pdfId);
+        //     onClose();
+        //     router.push(`/pdf/${result.pdfId}`);
+        //   }
+        // }, 1500);
 
       } catch (error: any) {
         console.error('❌ Upload failed:', error);
