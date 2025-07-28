@@ -2,14 +2,16 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Avatar } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
-import { Plus, Search, Loader2, AlertCircle, User } from "lucide-react";
+import { Plus, Search, Loader2, AlertCircle, User, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getPublishedBlogs } from "@/lib/actions/blog-actions";
 import { BlogWithDetails } from "@/types/blog";
 import BlogReader from "@/components/blog/BlogReader";
+import { createClient } from "@/utils/supabase/client";
 
 // --- RetroGrid copied from dashboard ---
 const RetroGrid = ({ angle = 65, cellSize = 60, opacity = 0.3, lineColor = "rgba(120,119,198,0.3)" }) => {
@@ -38,7 +40,51 @@ export default function BlogsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBlogSlug, setSelectedBlogSlug] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [headerLoading, setHeaderLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClient();
+
+  // Get user data for header
+  useEffect(() => {
+    const getUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error);
+        return;
+      }
+      setUser(data.user || null);
+    };
+    getUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        setUser(session?.user || null);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+        router.push("/login");
+      }
+    });
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [supabase, router]);
+
+  // Handle logout
+  const handleLogout = async () => {
+    setHeaderLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (!error) {
+        router.push("/login");
+      }
+    } catch (error) {
+      console.log("Logout error:", error);
+      router.push("/login");
+    } finally {
+      setHeaderLoading(false);
+    }
+  };
 
   // Fetch all blogs from database
   useEffect(() => {
@@ -102,98 +148,178 @@ export default function BlogsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden flex items-center justify-center py-8 px-2">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <RetroGrid />
-      <div className="absolute top-0 z-[0] h-screen w-screen bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+      <div className="absolute top-0 z-[0] h-screen w-screen bg-blue-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(59,130,246,0.3),rgba(255,255,255,0))]" />
 
-      {/* Blog Reader Modal */}
-      {selectedBlogSlug && (
-        <BlogReader
-          blogSlug={selectedBlogSlug}
-          onClose={handleCloseReader}
-        />
-      )}
-
-      <motion.div
-        initial={{ opacity: 0, y: 32 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-        className="w-full max-w-6xl relative z-10"
-      >
-        <Card className="backdrop-blur-xl bg-black/30 border border-white/10 rounded-2xl shadow-xl p-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Explore & Create Blogs</h1>
-              <p className="text-gray-400">Discover amazing content from our community</p>
-            </div>
-            <div className="flex gap-2 w-full md:w-auto">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  placeholder="Search blogs..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-                <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
-              </div>
-              <Button asChild variant="outline" className="ml-2">
-                <Link href="/blogs/my-blogs">
-                  <User className="w-4 h-4 mr-2" /> My Blogs
-                </Link>
-              </Button>
-              <Button asChild className="ml-2">
-                <Link href="/editor">
-                  <Plus className="w-4 h-4 mr-2" /> Write New Blog
-                </Link>
-              </Button>
-            </div>
+      {/* Header - Copied from dashboard with blue theme */}
+      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/10 bg-black/50 backdrop-blur-xl">
+        <div className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-[linear-gradient(180deg,_#FFF_0%,_rgba(255,_255,_255,_0.7)_100%)]">
+          Welcome back, {user?.user_metadata?.first_name || user?.email || "User"}
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="relative inline-block overflow-hidden rounded-full p-[1px]">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-300/20 to-purple-200/20 rounded-full" />
+            <Avatar className="relative bg-gradient-to-tr from-zinc-300/5 via-blue-400/20 to-transparent border border-white/10">
+              <span className="text-lg font-semibold text-white">{user?.user_metadata?.full_name?.[0] || user?.email?.[0]}</span>
+            </Avatar>
           </div>
+          <span className="relative inline-block overflow-hidden rounded-full p-[1px]">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-300/20 to-purple-200/20 rounded-full" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              disabled={headerLoading}
+              className="relative bg-gradient-to-tr from-zinc-300/5 via-blue-400/20 to-transparent border border-white/10 hover:from-zinc-300/10 hover:via-blue-400/30 text-white"
+              aria-label="Logout"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </Button>
+          </span>
+        </div>
+      </header>
 
-          {/* Loading state */}
-          {loading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-4" />
-                <p className="text-gray-400">Loading blogs...</p>
-              </div>
-            </div>
-          )}
+      {/* Main Content */}
+      <div className="relative z-10 flex items-center justify-center py-8 px-2">
+        {/* Blog Reader Modal */}
+        {selectedBlogSlug && (
+          <BlogReader
+            blogSlug={selectedBlogSlug}
+            onClose={handleCloseReader}
+          />
+        )}
 
-          {/* Error state */}
-          {error && !loading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-4" />
-                <p className="text-red-400 mb-4">{error}</p>
-                <Button onClick={() => window.location.reload()}>
-                  Try Again
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="w-full max-w-6xl relative z-10"
+        >
+          <Card className="backdrop-blur-xl bg-black/30 border border-white/10 rounded-2xl shadow-xl p-8">
+            {/* Back to Dashboard button in left corner */}
+            <div className="mb-6">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  size="lg"
+                  onClick={() => router.push('/dashboard')}
+                  className="w-full md:w-auto flex items-center gap-2 bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Dashboard
                 </Button>
+              </motion.div>
+            </div>
+
+            {/* Heading and action buttons */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Explore & Create Blogs</h1>
+                <p className="text-gray-400">Discover amazing content from our community</p>
+              </div>
+              <div className="flex gap-2 w-full md:w-auto">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search blogs..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+                </div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Button asChild variant="outline" className="ml-2 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all hover:text-white duration-300">
+                    <Link href="/blogs/my-blogs">
+                      <User className="w-4 h-4 mr-2" /> My Blogs
+                    </Link>
+                  </Button>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Button asChild className="ml-2 bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
+                    <Link href="/editor">
+                      <Plus className="w-4 h-4" /> Write New Blog
+                    </Link>
+                  </Button>
+                </motion.div>
               </div>
             </div>
-          )}
 
-          {/* Blog Cards Grid */}
-          {!loading && !error && (
+            {/* Loading state */}
+            {loading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-4" />
+                  <p className="text-gray-400">Loading blogs...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Error state */}
+            {error && !loading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-4" />
+                  <p className="text-red-400 mb-4">{error}</p>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  >
+                    <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="border-blue-500/30 hover:bg-blue-500/20">
+                      Try Again
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
+            )}
+
+            {/* Blog Cards Grid */}
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {blogs.length === 0 ? (
+              {!loading && !error && blogs.length === 0 ? (
                 <Card className="col-span-full p-8 text-center text-gray-300 bg-black/30 border border-white/10">
                   {searchTerm ? (
                     <>
                       <p className="mb-4">No blogs found matching "{searchTerm}"</p>
-                      <Button variant="outline" onClick={() => setSearchTerm("")}>
-                        Clear Search
-                      </Button>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      >
+                        <Button variant="outline" onClick={() => setSearchTerm("")} className="border-blue-500/30 hover:bg-blue-500/20">
+                          Clear Search
+                        </Button>
+                      </motion.div>
                     </>
                   ) : (
                     <>
                       <p className="mb-4">No blogs found. Start by writing your first blog!</p>
-                      <Button asChild>
-                        <Link href="/editor">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Write Your First Blog
-                        </Link>
-                      </Button>
+                      <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                      >
+                        <Button asChild className="bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
+                          <Link href="/editor">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Write Your First Blog
+                          </Link>
+                        </Button>
+                      </motion.div>
                     </>
                   )}
                 </Card>
@@ -203,11 +329,10 @@ export default function BlogsPage() {
                     key={blog.id}
                     whileHover={{ scale: 1.03, boxShadow: "0 4px 32px 0 rgba(0,0,0,0.15)" }}
                     transition={{ type: "spring", stiffness: 300 }}
+                    onClick={() => handleBlogClick(blog.slug)}
+                    className="cursor-pointer"
                   >
-                    <Card
-                      className="backdrop-blur-xl bg-black/20 border border-white/10 p-6 flex flex-col h-full transition-all cursor-pointer"
-                      onClick={() => handleBlogClick(blog.slug)}
-                    >
+                    <Card className="backdrop-blur-xl bg-black/20 border border-white/10 p-6 flex flex-col h-full transition-all hover:border-blue-500/30">
                       {/* Cover image */}
                       {blog.cover_image_url && (
                         <div className="mb-4">
@@ -239,7 +364,7 @@ export default function BlogsPage() {
 
                       {/* Author info */}
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-xs font-semibold">
+                        <div className="w-6 h-6 rounded-full bg-gray-500 flex items-center justify-center text-xs font-semibold">
                           {blog.author?.user_metadata?.first_name?.[0] || blog.author?.email?.[0] || 'U'}
                         </div>
                         <span className="text-sm text-gray-400">
@@ -256,9 +381,9 @@ export default function BlogsPage() {
                 ))
               )}
             </div>
-          )}
-        </Card>
-      </motion.div>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   );
 }

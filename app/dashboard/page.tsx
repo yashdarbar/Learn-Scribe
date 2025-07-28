@@ -122,10 +122,10 @@ export default function Dashboard() {
       {/* Main Split Layout */}
       <main className="relative z-10 flex-1 flex flex-col md:flex-row p-8 gap-8">
         <div className="w-full md:w-1/2">
-          <BlogSection />
+          <PdfSection />
         </div>
         <div className="w-full md:w-1/2">
-          <PdfSection />
+          <BlogSection />
         </div>
       </main>
     </div>

@@ -55,7 +55,7 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
   (
     {
       className,
-      title = "AI-Powered Blogging & PDF Learning Platform",
+      title = "AI-Powered PDF Learning Platform & Blogging",
       subtitle = {
         regular: "Create better content with ",
         gradient: "AI writing and PDF learning tools.",

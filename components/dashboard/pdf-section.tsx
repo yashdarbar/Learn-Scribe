@@ -62,12 +62,12 @@ export function PdfSection() {
         </Button>
 
         {/* Secondary CTA */}
-        <Button asChild variant="ghost" size="sm">
+        {/* <Button asChild variant="ghost" size="sm">
           <Link href="/pdf-demo">
             See How It Works
             <Play className="w-3 h-3 ml-2" />
           </Link>
-        </Button>
+        </Button> */}
       </div>
     </motion.section>
   )

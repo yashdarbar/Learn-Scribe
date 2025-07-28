@@ -31,7 +31,7 @@ const QuizPreview: React.FC<{
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      className="space-y-4 mt-4"
     >
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white">Generated Quiz Questions</h3>
@@ -43,13 +43,13 @@ const QuizPreview: React.FC<{
         </button>
       </div>
 
-      <div className="space-y-4 max-h-96 overflow-y-auto">
+      <div className="space-y-3 max-h-48 overflow-y-auto">
         {questions.map((question, index) => (
           <div
             key={index}
-            className="bg-black/20 border border-white/10 rounded-lg p-4"
+            className="bg-black/20 border border-white/10 rounded-lg p-3"
           >
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-2">
               <span className="text-xs bg-purple-600/50 text-purple-200 px-2 py-1 rounded">
                 Question {index + 1}
               </span>
@@ -62,45 +62,43 @@ const QuizPreview: React.FC<{
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div>
-                <span className="text-sm font-medium text-purple-300">Q:</span>
-                <p className="text-white text-sm mt-1">{question.question}</p>
+                <span className="text-xs font-medium text-purple-300">Q:</span>
+                <p className="text-white text-xs mt-1 line-clamp-2">{question.question}</p>
               </div>
 
-              <div className="space-y-2">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
-                      A
-                    </span>
-                    <span className="text-gray-300 text-sm">{question.option_a}</span>
-                  </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
+                    A
+                  </span>
+                  <span className="text-gray-300 text-xs line-clamp-1">{question.option_a}</span>
+                </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
-                      B
-                    </span>
-                    <span className="text-gray-300 text-sm">{question.option_b}</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
+                    B
+                  </span>
+                  <span className="text-gray-300 text-xs line-clamp-1">{question.option_b}</span>
+                </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
-                      C
-                    </span>
-                    <span className="text-gray-300 text-sm">{question.option_c}</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
+                    C
+                  </span>
+                  <span className="text-gray-300 text-xs line-clamp-1">{question.option_c}</span>
+                </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
-                      D
-                    </span>
-                    <span className="text-gray-300 text-sm">{question.option_d}</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
+                    D
+                  </span>
+                  <span className="text-gray-300 text-xs line-clamp-1">{question.option_d}</span>
                 </div>
               </div>
 
-              <div className="mt-3 p-2 bg-blue-900/20 border border-blue-500/20 rounded text-xs text-blue-200">
+              <div className="mt-2 p-2 bg-blue-900/20 border border-blue-500/20 rounded text-xs text-blue-200">
                 <span className="font-medium">💡 Hint:</span> Take the quiz to see explanations and correct answers!
               </div>
             </div>
@@ -111,7 +109,7 @@ const QuizPreview: React.FC<{
       <div className="flex gap-2">
         <button
           onClick={onTakeQuiz}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium text-sm"
         >
           <Play className="w-4 h-4" />
           Take Quiz Now
@@ -119,7 +117,7 @@ const QuizPreview: React.FC<{
         <button
           onClick={handleSave}
           disabled={!title.trim() || isSaving}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium text-sm"
         >
           {isSaving ? (
             <>
@@ -135,14 +133,14 @@ const QuizPreview: React.FC<{
         </button>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm text-gray-300">Quiz Title:</label>
+      <div className="space-y-1">
+        <label className="text-xs text-gray-300">Quiz Title:</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter a title for this quiz..."
-          className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
         />
       </div>
     </motion.div>

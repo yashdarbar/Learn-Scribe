@@ -31,7 +31,7 @@ const FlashcardPreview: React.FC<{
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      className="space-y-4 mt-4"
     >
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-white">Generated Flashcards</h3>
@@ -43,11 +43,11 @@ const FlashcardPreview: React.FC<{
         </button>
       </div>
 
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3 max-h-48 overflow-y-auto">
         {flashcards.map((card, index) => (
           <div
             key={index}
-            className="bg-black/20 border border-white/10 rounded-lg p-4"
+            className="bg-black/20 border border-white/10 rounded-lg p-3"
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs bg-purple-600/50 text-purple-200 px-2 py-1 rounded">
@@ -61,14 +61,14 @@ const FlashcardPreview: React.FC<{
                 {card.difficulty_level}
               </span>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div>
-                <span className="text-sm font-medium text-purple-300">Q:</span>
-                <p className="text-white text-sm mt-1">{card.question}</p>
+                <span className="text-xs font-medium text-purple-300">Q:</span>
+                <p className="text-white text-xs mt-1 line-clamp-2">{card.question}</p>
               </div>
               <div>
-                <span className="text-sm font-medium text-green-300">A:</span>
-                <p className="text-gray-300 text-sm mt-1">{card.answer}</p>
+                <span className="text-xs font-medium text-green-300">A:</span>
+                <p className="text-gray-300 text-xs mt-1 line-clamp-2">{card.answer}</p>
               </div>
             </div>
           </div>
@@ -78,7 +78,7 @@ const FlashcardPreview: React.FC<{
       <div className="flex gap-2">
         <button
           onClick={onStudy}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium text-sm"
         >
           <Play className="w-4 h-4" />
           Study Now
@@ -86,7 +86,7 @@ const FlashcardPreview: React.FC<{
         <button
           onClick={handleSave}
           disabled={!title.trim() || isSaving}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium text-sm"
         >
           {isSaving ? (
             <>
@@ -102,14 +102,14 @@ const FlashcardPreview: React.FC<{
         </button>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm text-gray-300">Set Title:</label>
+      <div className="space-y-1">
+        <label className="text-xs text-gray-300">Set Title:</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter a title for this flashcard set..."
-          className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
         />
       </div>
     </motion.div>

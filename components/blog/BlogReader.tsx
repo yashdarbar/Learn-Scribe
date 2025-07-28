@@ -125,7 +125,7 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
     return (
       <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-purple-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-white">Loading blog...</p>
         </div>
       </div>
@@ -141,10 +141,19 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
           </div>
           <h2 className="text-xl font-semibold text-white mb-2">Blog Not Found</h2>
           <p className="text-gray-400 mb-4">{error || 'The blog you are looking for does not exist.'}</p>
-          <Button onClick={onClose}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Go Back
-          </Button>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <Button
+              onClick={onClose}
+              className="bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Go Back
+            </Button>
+          </motion.div>
         </div>
       </div>
     );
@@ -157,14 +166,34 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
         <header className="sticky top-0 z-10 bg-black/80 backdrop-blur-xl border-b border-white/10">
           <div className="max-w-4xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <Button
-                variant="ghost"
-                onClick={onClose}
-                className="text-gray-400 hover:text-white"
+              {/* <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Back
-              </Button>
+                <Button
+                  variant="ghost"
+                  onClick={onClose}
+                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/20 transition-all duration-300"
+                >
+                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  Back
+                </Button>
+              </motion.div> */}
+              <motion.div
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+>
+  <Button
+    onClick={onClose}
+    className="ml-2 bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center"
+  >
+    <ArrowLeft className="w-5 h-5" />
+    Back
+  </Button>
+</motion.div>
+
 
               <div className="flex items-center gap-3">
                 <Button
@@ -202,7 +231,7 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleShare('twitter')}
-                            className="text-blue-400 hover:text-blue-300"
+                            className="text-gray-400 hover:text-blue-400"
                           >
                             <Twitter className="w-4 h-4" />
                           </Button>
@@ -210,7 +239,7 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleShare('facebook')}
-                            className="text-blue-600 hover:text-blue-500"
+                            className="text-gray-400 hover:text-blue-600"
                           >
                             <Facebook className="w-4 h-4" />
                           </Button>
@@ -218,7 +247,7 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleShare('linkedin')}
-                            className="text-blue-700 hover:text-blue-600"
+                            className="text-gray-400 hover:text-blue-700"
                           >
                             <Linkedin className="w-4 h-4" />
                           </Button>
@@ -240,19 +269,43 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
           </div>
         </header>
 
-        {/* Main content */}
-        <main className="max-w-4xl mx-auto px-6 py-8">
-          {/* Blog header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
+        {/* Content */}
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          {/* Blog Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 text-sm mb-4">
+              <Calendar className="w-4 h-4" />
+              <span>{formatDate(blog.published_at || blog.created_at)}</span>
+              <span>•</span>
+              <Clock className="w-4 h-4" />
+              <span>{blog.read_time} min read</span>
+            </div>
+
+            <h1 className="text-4xl font-bold text-white mb-4">{blog.title}</h1>
+            {blog.excerpt && (
+              <p className="text-xl text-gray-300 mb-6">{blog.excerpt}</p>
+            )}
+
+            {/* Author */}
+            <div className="flex items-center gap-3 mb-6">
+              <Avatar className="w-10 h-10">
+                <span className="text-lg font-semibold text-black">
+                  {blog.author?.user_metadata?.first_name?.[0] || blog.author?.email?.[0] || 'U'}
+                </span>
+              </Avatar>
+              <div>
+                <p className="text-white font-medium">
+                  {blog.author?.user_metadata?.first_name || blog.author?.email || 'Unknown Author'}
+                </p>
+                <p className="text-sm text-blue-400">Author</p>
+              </div>
+            </div>
+
             {/* Category */}
             {blog.category && (
-              <div className="mb-4">
+              <div className="mb-6">
                 <span
-                  className="inline-block px-3 py-1 rounded-full text-xs font-medium"
+                  className="inline-block px-3 py-1 rounded-full text-sm font-medium"
                   style={{
                     backgroundColor: `${blog.category.color}20`,
                     color: blog.category.color
@@ -262,68 +315,15 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
                 </span>
               </div>
             )}
+          </div>
 
-            {/* Title */}
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-              {blog.title}
-            </h1>
-
-            {/* Cover image */}
-            {blog.cover_image_url && (
-              <div className="mb-6">
-                <img
-                  src={blog.cover_image_url}
-                  alt={blog.title}
-                  className="w-full h-64 md:h-80 object-cover rounded-lg border border-white/10"
-                />
-              </div>
-            )}
-
-            {/* Meta information */}
-            <div className="flex items-center gap-6 text-sm text-gray-400 mb-6">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                <span>{blog.author.user_metadata?.first_name || blog.author.email}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>{formatDate(blog.published_at || blog.created_at)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>{blog.read_time} min read</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4" />
-                <span>{blog.view_count} views</span>
-              </div>
-            </div>
-
-            {/* Excerpt */}
-            {blog.excerpt && (
-              <p className="text-lg text-gray-300 leading-relaxed mb-8">
-                {blog.excerpt}
-              </p>
-            )}
-          </motion.div>
-
-          {/* Blog content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="prose prose-invert prose-lg max-w-none"
-          >
+          {/* Blog Content */}
+          <div className="prose prose-invert max-w-none">
             <BlogContent content={blog.content} />
-          </motion.div>
+          </div>
 
-          {/* Engagement section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-12 pt-8 border-t border-white/10"
-          >
+          {/* Engagement */}
+          <div className="mt-12">
             <BlogEngagement
               blog={blog}
               isLiked={isLiked}
@@ -331,8 +331,8 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
               onLike={handleLike}
               onShare={handleShare}
             />
-          </motion.div>
-        </main>
+          </div>
+        </div>
       </div>
     </div>
   );

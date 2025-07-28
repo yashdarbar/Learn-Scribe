@@ -73,7 +73,7 @@ export default function BlogEngagement({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
+            variant="default"
             onClick={onLike}
             className={`flex items-center gap-2 ${
               isLiked ? 'text-red-400' : 'text-gray-400 hover:text-red-400'
@@ -85,7 +85,7 @@ export default function BlogEngagement({
 
           <div className="relative">
             <Button
-              variant="ghost"
+              variant="default"
               onClick={() => handleShare('copy')}
               className="flex items-center gap-2 text-gray-400 hover:text-white"
             >
@@ -96,7 +96,7 @@ export default function BlogEngagement({
 
           <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant="default"
               onClick={() => handleShare('twitter')}
               className="flex items-center gap-2 text-gray-400 hover:text-blue-400"
               title="Share on Twitter"
@@ -107,7 +107,7 @@ export default function BlogEngagement({
             </Button>
 
             <Button
-              variant="ghost"
+              variant="default"
               onClick={() => handleShare('facebook')}
               className="flex items-center gap-2 text-gray-400 hover:text-blue-600"
               title="Share on Facebook"
@@ -118,7 +118,7 @@ export default function BlogEngagement({
             </Button>
 
             <Button
-              variant="ghost"
+              variant="default"
               onClick={() => handleShare('linkedin')}
               className="flex items-center gap-2 text-gray-400 hover:text-blue-700"
               title="Share on LinkedIn"
@@ -130,7 +130,7 @@ export default function BlogEngagement({
           </div>
 
           <Button
-            variant="ghost"
+            variant="default"
             className="flex items-center gap-2 text-gray-400 hover:text-white"
           >
             <MessageCircle className="w-5 h-5" />
@@ -138,7 +138,7 @@ export default function BlogEngagement({
           </Button>
 
           <Button
-            variant="ghost"
+            variant="default"
             className="flex items-center gap-2 text-gray-400 hover:text-white"
           >
             <Bookmark className="w-5 h-5" />
@@ -151,7 +151,7 @@ export default function BlogEngagement({
       <div className="bg-black/20 border border-white/10 rounded-lg p-6">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12">
-            <span className="text-lg font-semibold text-white">
+            <span className="text-lg font-semibold text-black">
               {blog.author.user_metadata?.first_name?.[0] || blog.author.email?.[0] || 'U'}
             </span>
           </Avatar>
@@ -163,7 +163,7 @@ export default function BlogEngagement({
             <p className="text-gray-400 text-sm mb-3">
               Author of this blog post
             </p>
-            <Button variant="outline" size="sm">
+            <Button variant="default" size="sm">
               <User className="w-4 h-4 mr-2" />
               View Profile
             </Button>
