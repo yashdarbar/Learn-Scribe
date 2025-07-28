@@ -61,13 +61,21 @@ export function BlogSection() {
           </Link>
         </Button>
 
-        {/* Secondary CTA */}
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/blogs">
-            Explore Sample Blogs
-            <ExternalLink className="w-3 h-3 ml-2" />
-          </Link>
-        </Button>
+        {/* Secondary CTAs */}
+        <div className="flex gap-2 mb-4">
+          <Button asChild variant="outline" size="sm" className="flex-1">
+            <Link href="/blogs">
+              Explore All Blogs
+              <ExternalLink className="w-3 h-3 ml-2" />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="flex-1">
+            <Link href="/blogs/my-blogs">
+              My Blogs
+              <ExternalLink className="w-3 h-3 ml-2" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </motion.section>
   )
