@@ -233,7 +233,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full space-y-4">
       {/* Header - Fixed */}
       <div className="flex items-center gap-2 mb-4">
         <BookOpen className="w-5 h-5 text-purple-400" />
@@ -245,51 +245,50 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
           {/* Content Area - Flex grow */}
           <div className="flex-1 flex flex-col space-y-4">
             {/* Content Input - Takes available space */}
-            <div className="flex-1 flex flex-col space-y-2">
-              <label className="text-sm text-gray-300">
-                Paste page content to generate flashcards from:
+            <div className="flex-1">
+              <label htmlFor="content" className="block text-sm font-medium text-gray-300 mb-2">
+                Page Content
               </label>
               <textarea
                 ref={textareaRef}
+                id="content"
+                rows={8}
+                maxLength={5000}
+                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm resize-none transition"
+                placeholder="Paste the page content here to generate flashcards..."
                 value={content}
                 onChange={handleContentChange}
-                placeholder="Paste the page content here... The AI will generate 5 flashcards covering key concepts, facts, and applications from this content."
-                className="flex-1 min-h-[120px] max-h-[300px] resize-none rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm transition-all duration-200"
-                maxLength={5000}
-                style={{
-                  height: '120px', // Fixed minimum height
-                  maxHeight: '300px' // Prevent over-expansion
-                }}
+                disabled={isGenerating}
               />
-              <div className="text-xs text-gray-500 text-right">
-                {content.length}/5000 characters
+              <div className="text-xs text-gray-500 mt-1 text-right">
+                {content.length}/5000
               </div>
             </div>
 
             {/* Error Display - Fixed */}
             {error && (
-              <div className="text-sm text-red-400 bg-red-900/10 border border-red-500/20 rounded-lg px-3 py-2">
+              <div className="text-red-400 text-sm bg-red-900/20 border border-red-500/20 rounded-lg p-3 flex-shrink-0">
                 ❌ {error}
               </div>
             )}
           </div>
 
           {/* Generate Button - Always at bottom */}
-          <div className="mt-4 pt-4 border-t border-white/10">
+          <div className="flex-shrink-0 space-y-3">
             <button
               onClick={handleGenerate}
               disabled={!content.trim() || isGenerating}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium"
+              className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded-lg flex items-center justify-center gap-2"
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Generating 5 Flashcards...
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating Flashcards...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5" />
-                  Generate 5 Flashcards
+                  <BookOpen className="w-4 h-4" />
+                  Generate Flashcards
                 </>
               )}
             </button>

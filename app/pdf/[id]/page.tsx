@@ -9,7 +9,9 @@ import TextSelectionPopup from "@/components/pdf/TextSelectionPopup";
 import ChatInterface from "@/components/pdf/ChatInterface";
 import PDFViewerClient from "@/components/pdf/PDFViewerClient";
 import FlashcardGenerator from "@/components/pdf/FlashcardGenerator";
-import FlashcardSets from "@/components/pdf/FlashcardSets";
+import MySets from "@/components/pdf/MySets";
+import QuizGenerator from "@/components/pdf/QuizGenerator";
+import QuizSets from "@/components/pdf/QuizSets";
 
 // --- RetroGrid copied from dashboard ---
 const RetroGrid = ({ angle = 65, cellSize = 60, opacity = 0.3, lineColor = "rgba(120,119,198,0.3)" }) => {
@@ -77,7 +79,7 @@ export default function PDFViewerPage() {
   // ✅ ADD: Active tab state for Chat/Flashcards
   const [activeTab, setActiveTab] = useState<'chat' | 'flashcards'>('chat');
   // ✅ ADD: New tab state for the improved navigation
-  const [activeTabNew, setActiveTabNew] = useState<'chat' | 'flashcards' | 'sets'>('chat');
+  const [activeTabNew, setActiveTabNew] = useState<'chat' | 'flashcards' | 'quiz' | 'sets'>('chat');
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -495,7 +497,7 @@ export default function PDFViewerPage() {
               <div className="flex items-center gap-2 justify-center">
                 <span>💬</span>
                 <span>Chat</span>
-              </div>
+                  </div>
             </button>
             <button
               onClick={() => setActiveTabNew('flashcards')}
@@ -508,6 +510,19 @@ export default function PDFViewerPage() {
               <div className="flex items-center gap-2 justify-center">
                 <span>📚</span>
                 <span>Flashcards</span>
+                </div>
+            </button>
+            <button
+              onClick={() => setActiveTabNew('quiz')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                activeTabNew === 'quiz'
+                  ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-900/20'
+                  : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+              }`}
+            >
+              <div className="flex items-center gap-2 justify-center">
+                <span>❓</span>
+                <span>Quiz</span>
               </div>
             </button>
             <button
@@ -523,7 +538,7 @@ export default function PDFViewerPage() {
                 <span>My Sets</span>
               </div>
             </button>
-          </div>
+              </div>
 
           {/* ✅ UPDATED: Chat messages area with new ChatInterface props */}
           <div className="flex-1 overflow-hidden">
@@ -541,8 +556,20 @@ export default function PDFViewerPage() {
                 <div className="text-center mb-6">
                   <h3 className="text-lg font-semibold text-white mb-2">Generate Flashcards</h3>
                   <p className="text-sm text-gray-400">Paste page content to create study cards</p>
-                </div>
+                  </div>
                 <FlashcardGenerator
+                  pdfId={pdfId}
+                  pageNumber={page}
+                  docTitle={pdfData?.filename}
+                />
+                </div>
+            ) : activeTabNew === 'quiz' ? (
+              <div className="flex flex-col h-full p-4">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-2">Generate Quiz</h3>
+                  <p className="text-sm text-gray-400">Create multiple choice questions from page content</p>
+                </div>
+                <QuizGenerator
                   pdfId={pdfId}
                   pageNumber={page}
                   docTitle={pdfData?.filename}
@@ -551,10 +578,10 @@ export default function PDFViewerPage() {
             ) : activeTabNew === 'sets' ? (
               <div className="flex flex-col h-full p-4">
                 <div className="text-center mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-2">My Flashcard Sets</h3>
-                  <p className="text-sm text-gray-400">View and manage your saved sets</p>
-                </div>
-                <FlashcardSets pdfId={pdfId} />
+                  <h3 className="text-lg font-semibold text-white mb-2">My Study Sets</h3>
+                  <p className="text-sm text-gray-400">View and manage your saved flashcards and quizzes</p>
+            </div>
+                <MySets pdfId={pdfId} />
               </div>
             ) : null}
           </div>
@@ -641,7 +668,7 @@ export default function PDFViewerPage() {
 
               {/* Flashcard Sets */}
               <div className="border-t border-white/10 p-4">
-                <FlashcardSets pdfId={pdfId} />
+                <MySets pdfId={pdfId} />
               </div>
             </div>
           )}

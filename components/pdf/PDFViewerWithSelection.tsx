@@ -5,16 +5,89 @@ import { Loader2 } from "lucide-react";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// ✅ FIXED: Better worker configuration for Next.js
-// ✅ Use the local worker file you just copied
-try {
-  if (typeof window !== 'undefined') {
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf-worker/pdf.worker.min.js';
-    console.log('✅ PDF.js worker set to local version:', pdfjs.GlobalWorkerOptions.workerSrc);
+// ✅ ENHANCED: Robust worker configuration with fallbacks
+const configurePDFWorker = () => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    // Try local worker first
+    const localWorkerPath = '/pdf-worker/pdf.worker.min.js';
+
+    // Test if the worker file exists by making a HEAD request
+    fetch(localWorkerPath, { method: 'HEAD' })
+      .then(response => {
+        if (response.ok) {
+          pdfjs.GlobalWorkerOptions.workerSrc = localWorkerPath;
+          console.log('✅ PDF.js worker set to local version:', pdfjs.GlobalWorkerOptions.workerSrc);
+        } else {
+          // Fallback to CDN
+          pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+          console.log('⚠️ Local worker not found, using CDN fallback');
+        }
+      })
+      .catch(() => {
+        // Fallback to CDN if local worker fails
+        pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+        console.log('⚠️ Local worker failed, using CDN fallback');
+      });
+  } catch (err) {
+    console.error('❌ Failed to configure PDF.js worker:', err);
+    // Final fallback
+    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
   }
-} catch (err) {
-  console.error('❌ Failed to configure PDF.js worker:', err);
+};
+
+// Configure worker on mount
+configurePDFWorker();
+
+// ✅ ENHANCED: Synchronous worker configuration with immediate fallback
+const configurePDFWorkerSync = () => {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    // Set a default worker immediately to prevent null errors
+    const defaultWorker = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = defaultWorker;
+
+    // Try to use local worker if available
+    const localWorkerPath = '/pdf-worker/pdf.worker.min.js';
+
+    // Check if local worker exists synchronously (this is a best effort)
+    const xhr = new XMLHttpRequest();
+    xhr.open('HEAD', localWorkerPath, false); // Synchronous request
+    try {
+      xhr.send();
+      if (xhr.status === 200) {
+        pdfjs.GlobalWorkerOptions.workerSrc = localWorkerPath;
+        console.log('✅ PDF.js worker set to local version:', pdfjs.GlobalWorkerOptions.workerSrc);
+      } else {
+        console.log('⚠️ Local worker not found, using CDN fallback');
+      }
+    } catch (e) {
+      console.log('⚠️ Local worker check failed, using CDN fallback');
+    }
+
+    return true;
+  } catch (err) {
+    console.error('❌ Failed to configure PDF.js worker:', err);
+    return false;
+  }
+};
+
+// ✅ ENHANCED: Initialize worker synchronously
+let workerConfigured = false;
+if (typeof window !== 'undefined') {
+  workerConfigured = configurePDFWorkerSync();
+  console.log('PDF.js API version:', pdfjs.version);
+  console.log('Worker configured:', workerConfigured);
 }
+
+// ✅ STATIC: Document options defined outside component to prevent re-creation
+const STATIC_DOCUMENT_OPTIONS = {
+  cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+  cMapPacked: true,
+  standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+} as const;
 
 // Log PDF.js version for debugging
 if (typeof window !== 'undefined') {
@@ -90,7 +163,30 @@ const PDFViewerWithSelection: React.FC<PDFViewerWithSelectionProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [workerReady, setWorkerReady] = useState(workerConfigured);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // ✅ ENHANCED: Ensure worker is ready before PDF operations
+  useEffect(() => {
+    if (!workerReady) {
+      // Try to configure worker if not already done
+      const configureWorker = () => {
+        try {
+          if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+            configurePDFWorkerSync();
+          }
+          setWorkerReady(true);
+        } catch (err) {
+          console.error('Failed to configure worker:', err);
+          setError('PDF worker initialization failed');
+        }
+      };
+
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(configureWorker, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [workerReady]);
 
   // Debounce zoom
   const debouncedZoom = useDebounce(zoom, 150); // 150ms delay
@@ -160,23 +256,50 @@ const PDFViewerWithSelection: React.FC<PDFViewerWithSelectionProps> = ({
   const handleLoadError = useCallback((err: any) => {
     console.error('PDF Load Error:', err);
 
-    // Check if it's a worker-related error
-    if (err.message?.includes('sendWithPromise') || err.message?.includes('WorkerTransport')) {
+    // Enhanced error handling for worker issues
+    const isWorkerError = err.message?.includes('sendWithPromise') ||
+                         err.message?.includes('WorkerTransport') ||
+                         err.message?.includes('Worker') ||
+                         err.message?.includes('null');
+
+    if (isWorkerError) {
       if (retryCount < 3) {
-        console.log(`🔄 Retrying PDF load (${retryCount + 1}/3)`);
+        console.log(`🔄 Retrying PDF load (${retryCount + 1}/3) - Worker error detected`);
         setRetryCount(prev => prev + 1);
 
-        // Brief delay before retry
+        // Longer delay for worker issues
+        setTimeout(() => {
+          setError(null);
+          setLoading(true);
+          // Reconfigure worker on retry
+          configurePDFWorkerSync();
+        }, 1000 * (retryCount + 1)); // Exponential backoff
+        return;
+      } else {
+        // Final fallback: try without worker
+        console.log('⚠️ Worker failed completely, trying without worker...');
+        setError("PDF worker failed. Trying alternative loading method...");
+        setTimeout(() => {
+          setError(null);
+          setLoading(true);
+          // Force a re-render with different key to bypass worker
+          setRetryCount(prev => prev + 1);
+        }, 2000);
+        return;
+      }
+    } else {
+      // Non-worker errors
+      if (retryCount < 2) {
+        console.log(`🔄 Retrying PDF load (${retryCount + 1}/2) - General error`);
+        setRetryCount(prev => prev + 1);
         setTimeout(() => {
           setError(null);
           setLoading(true);
         }, 500);
         return;
       } else {
-        setError("PDF worker connection failed. Please refresh the page.");
+        setError("Failed to load PDF. Please check the file and try again.");
       }
-    } else {
-      setError("Failed to load PDF");
     }
 
     setLoading(false);
@@ -246,6 +369,18 @@ const PDFViewerWithSelection: React.FC<PDFViewerWithSelectionProps> = ({
     };
   }, [onTextSelect]);
 
+  // Don't render PDF until worker is ready
+  if (!workerReady) {
+    return (
+      <div className="w-full h-full relative rounded-lg border border-white/10 bg-white dark:bg-black overflow-auto shadow-lg scroll-smooth flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 text-purple-400 animate-spin mb-4" />
+          <div className="text-gray-400">Initializing PDF viewer...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
@@ -266,15 +401,39 @@ const PDFViewerWithSelection: React.FC<PDFViewerWithSelectionProps> = ({
 
       {error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-red-900/20 border border-red-500/20 rounded-lg">
-          <div className="text-center p-8">
-            <h2 className="text-2xl font-bold text-red-300 mb-4">Error Loading PDF</h2>
-            <p className="text-sm">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-red-600/80 hover:bg-red-600 rounded-lg transition text-white text-sm"
-            >
-              Try Again
-            </button>
+          <div className="text-center p-8 max-w-md">
+            <h2 className="text-2xl font-bold text-red-300 mb-4">PDF Loading Error</h2>
+            <p className="text-sm text-red-200 mb-4">{error}</p>
+
+            {error.includes('worker') && (
+              <div className="text-xs text-red-300 mb-4 p-3 bg-red-900/30 rounded">
+                <p>This might be a temporary issue. Try:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Refreshing the page</li>
+                  <li>Checking your internet connection</li>
+                  <li>Waiting a moment and trying again</li>
+                </ul>
+              </div>
+            )}
+
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={() => {
+                  setError(null);
+                  setLoading(true);
+                  setRetryCount(0);
+                }}
+                className="px-4 py-2 bg-red-600/80 hover:bg-red-600 rounded-lg transition text-white text-sm"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-gray-600/80 hover:bg-gray-600 rounded-lg transition text-white text-sm"
+              >
+                Refresh Page
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -287,7 +446,8 @@ const PDFViewerWithSelection: React.FC<PDFViewerWithSelectionProps> = ({
           loading={null}
           error={null}
           className="w-full h-full"
-          key={`${debouncedZoom}-${page}`} // ✅ Force re-render only on debounced changes
+          key={`${debouncedZoom}-${page}-${retryCount}`} // ✅ Force re-render on retries
+          options={STATIC_DOCUMENT_OPTIONS}
         >
           <Page
             pageNumber={page}
@@ -297,6 +457,10 @@ const PDFViewerWithSelection: React.FC<PDFViewerWithSelectionProps> = ({
             loading={null}
             error={null}
             className="w-full h-full select-text"
+            onLoadError={(err) => {
+              console.error('Page load error:', err);
+              // Don't retry page errors, just log them
+            }}
           />
         </Document>
       </div>

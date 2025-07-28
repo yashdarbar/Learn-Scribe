@@ -14,6 +14,8 @@ interface PDFDocument {
   upload_status: 'processing' | 'completed' | 'failed';
   extracted_content?: string;
   created_at: string;
+  flashcard_count?: number;
+  quiz_count?: number;
 }
 
 interface ActionResult<T = any> {
@@ -148,9 +150,34 @@ export async function getUserPDFs(): Promise<ActionResult<PDFDocument[]>> {
       return { success: false, error: 'Failed to fetch PDFs from database' };
     }
 
-    console.log('✅ Fetched', pdfs?.length || 0, 'PDFs for user');
+    // Get counts for each PDF
+    const pdfsWithCounts = [];
 
-    return { success: true, data: pdfs || [] };
+    for (const pdf of pdfs || []) {
+      // Get flashcard sets count
+      const { count: flashcardCount } = await supabase
+        .from('flashcard_sets')
+        .select('*', { count: 'exact', head: true })
+        .eq('pdf_id', pdf.id)
+        .eq('user_id', user.id);
+
+      // Get quiz sets count
+      const { count: quizCount } = await supabase
+        .from('quiz_sets')
+        .select('*', { count: 'exact', head: true })
+        .eq('pdf_id', pdf.id)
+        .eq('user_id', user.id);
+
+      pdfsWithCounts.push({
+        ...pdf,
+        flashcard_count: flashcardCount || 0,
+        quiz_count: quizCount || 0
+      });
+    }
+
+    console.log('✅ Fetched', pdfsWithCounts?.length || 0, 'PDFs for user with counts');
+
+    return { success: true, data: pdfsWithCounts };
 
   } catch (error) {
     console.error('❌ Unexpected error in getUserPDFs:', error);

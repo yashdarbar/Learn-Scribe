@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { sendMessageToAIWithAuth, getChatHistoryWithAuth, clearChatHistoryWithAuth } from "@/lib/actions/chat-actions";
 import ChatMessage from "./ChatMessage";
-import { Loader2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface ChatInterfaceProps {
   pdfId: string;
@@ -24,6 +25,68 @@ interface ChatMessageType {
   selectedText?: string;
 }
 
+// Custom Delete Confirmation Modal Component
+const DeleteConfirmModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isDeleting: boolean;
+}> = ({ isOpen, onClose, onConfirm, isDeleting }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-black/90 border border-white/10 rounded-lg p-6 w-96 backdrop-blur-xl"
+      >
+        <div className="text-center">
+          <div className="w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Trash2 className="w-6 h-6 text-red-400" />
+          </div>
+
+          <h3 className="text-lg font-semibold text-white mb-2">Clear Chat History</h3>
+          <p className="text-gray-300 text-sm mb-2">
+            Are you sure you want to clear all chat messages?
+          </p>
+          <p className="text-gray-400 text-xs mb-6">
+            This action cannot be undone.
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              disabled={isDeleting}
+              className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 transition text-white rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              disabled={isDeleting}
+              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 transition text-white rounded-lg flex items-center justify-center gap-2"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Clearing...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Clear Chat
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   pdfId,
   docTitle,
@@ -39,6 +102,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [pendingSelectedText, setPendingSelectedText] = useState<string | undefined>(undefined);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);  // NEW REF
+
+  // Delete modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    isDeleting: boolean;
+  }>({
+    isOpen: false,
+    isDeleting: false
+  });
 
   // Auto-resize functionality for textarea
   const handleTextareaResize = useCallback(() => {
@@ -59,24 +131,34 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const handleClearChat = async () => {
     if (messages.length === 0) return;
 
-    if (window.confirm('Are you sure you want to clear all chat history?')) {
-      try {
-        // Clear from server
-        const result = await clearChatHistoryWithAuth(pdfId);
+    setDeleteModal({ isOpen: true, isDeleting: false });
+  };
 
-        if (result.success) {
-          // Clear from state
-          setMessages([]);
-          // Clear from localStorage
-          localStorage.removeItem(`pdf-chat-${pdfId}`);
-          console.log('Chat history cleared successfully');
-        } else {
-          console.error('Failed to clear chat history:', result.error);
-        }
-      } catch (error) {
-        console.error('Error clearing chat history:', error);
+  const handleDeleteConfirm = async () => {
+    setDeleteModal(prev => ({ ...prev, isDeleting: true }));
+
+    try {
+      // Clear from server
+      const result = await clearChatHistoryWithAuth(pdfId);
+
+      if (result.success) {
+        // Clear from state
+        setMessages([]);
+        // Clear from localStorage
+        localStorage.removeItem(`pdf-chat-${pdfId}`);
+        console.log('Chat history cleared successfully');
+      } else {
+        console.error('Failed to clear chat history:', result.error);
       }
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+    } finally {
+      setDeleteModal({ isOpen: false, isDeleting: false });
     }
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, isDeleting: false });
   };
 
   // ✅ ADD: Listen for clear chat trigger
@@ -388,6 +470,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       <div className="text-xs text-gray-500 px-4 pb-2 text-right">
         {input.length}/3000
       </div>
+
+      {/* Custom Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={deleteModal.isDeleting}
+      />
     </div>
   );
 };
