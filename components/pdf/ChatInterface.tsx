@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { sendMessageToAIWithAuth, getChatHistoryWithAuth, clearChatHistoryWithAuth } from "@/lib/actions/chat-actions";
 import ChatMessage from "./ChatMessage";
 import { Loader2 } from "lucide-react";
@@ -40,6 +40,21 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);  // NEW REF
 
+  // Auto-resize functionality for textarea
+  const handleTextareaResize = useCallback(() => {
+    const textarea = inputRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+    }
+  }, []);
+
+  // Handle input change with auto-resize
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    handleTextareaResize();
+  };
+
   // ✅ ADD: Clear chat functionality
   const handleClearChat = async () => {
     if (messages.length === 0) return;
@@ -76,17 +91,42 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     (async () => {
       try {
         setError(null);
+        console.log("🔄 Loading chat history for PDF:", pdfId);
         const history = await getChatHistoryWithAuth(pdfId);
+        console.log("📥 Raw chat history from DB:", history);
+
         // Convert database format to our chat message format
-        const formattedHistory = (history || []).map((msg: any) => ({
-          id: msg.id,
-          content: msg.response || msg.message,
-          role: (msg.user_id === "me" ? "user" : "assistant") as 'user' | 'assistant',
-          timestamp: new Date(msg.created_at),
-          selectedText: msg.selected_text,
-        }));
+        // Each DB row should create TWO messages: user message + AI response
+        const formattedHistory: ChatMessageType[] = [];
+
+        (history || []).forEach((dbRow: any, index: number) => {
+          // Create user message from the 'message' field
+          if (dbRow.message && dbRow.message.trim()) {
+            formattedHistory.push({
+              id: `user-${dbRow.id}-${index}`,
+              content: dbRow.message.trim(),
+              role: 'user' as const,
+              timestamp: new Date(dbRow.created_at),
+              selectedText: dbRow.selected_text,
+            });
+          }
+
+          // Create AI response from the 'response' field
+          if (dbRow.response && dbRow.response.trim()) {
+            formattedHistory.push({
+              id: `ai-${dbRow.id}-${index}`,
+              content: dbRow.response.trim(),
+              role: 'assistant' as const,
+              timestamp: new Date(dbRow.created_at),
+              selectedText: dbRow.selected_text,
+            });
+          }
+        });
+
+        console.log("✅ Formatted chat messages:", formattedHistory);
         setMessages(formattedHistory);
       } catch (err: any) {
+        console.error("❌ Error loading chat history:", err);
         setError("Failed to load chat history");
       }
     })();
@@ -96,6 +136,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Debug: Log messages state changes
+  useEffect(() => {
+    console.log("💬 Current messages state:", messages);
+  }, [messages]);
 
   // NEW: Handle selected text from popup actions
   useEffect(() => {
@@ -135,6 +180,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (!messageToSend.trim() && !pendingSelectedText) return;
 
     setError(null);
+    console.log("📤 Sending message:", messageToSend);
 
     // 1. Add user message immediately (optimistic update)
     const userMessage: ChatMessageType = {
@@ -145,25 +191,32 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       selectedText: pendingSelectedText,
     };
 
+    console.log("➕ Adding user message to state:", userMessage);
     setMessages(prev => [...prev, userMessage]);
 
     // 2. Add loading message for AI response
     const loadingMessage: ChatMessageType = {
       id: `ai-${Date.now()}`,
-      content: '',
+      content: 'AI is thinking...',
       role: 'assistant',
       loading: true,
       timestamp: new Date(),
     };
 
+    console.log("➕ Adding loading message to state:", loadingMessage);
     setMessages(prev => [...prev, loadingMessage]);
 
     // Clear input immediately for better UX
     setInput("");
     setPendingSelectedText(undefined);
+    // Reset textarea height
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
 
     try {
       // 3. Call server action
+      console.log("🤖 Calling AI with message:", messageToSend);
       const result = await sendMessageToAIWithAuth({
         pdfId,
         message: messageToSend,
@@ -172,8 +225,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         type: pendingSelectedText ? "explain" : "chat",
       });
 
+      console.log("🤖 AI response result:", result);
+
       if (result.success) {
         // 4. Replace loading message with actual response
+        console.log("✅ Replacing loading message with AI response:", result.response);
         setMessages(prev =>
           prev.map(msg =>
             msg.id === loadingMessage.id
@@ -188,6 +244,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         );
       } else {
         // Handle error - replace loading with error message
+        console.log("❌ AI response error:", result.error);
         setMessages(prev =>
           prev.map(msg =>
             msg.id === loadingMessage.id
@@ -204,6 +261,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       }
     } catch (err: any) {
       // Handle network error
+      console.error("❌ Network error sending message:", err);
       setMessages(prev =>
         prev.map(msg =>
           msg.id === loadingMessage.id
@@ -230,7 +288,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-black/20 rounded-xl border border-white/10 overflow-hidden">
-      {/* Chat messages (same as before) */}
+      {/* Chat messages - IMPROVED with proper user/AI message display */}
       <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar min-h-0">
         {messages.length === 0 && !loading && (
           <div className="text-center text-gray-400 mt-8">
@@ -239,14 +297,34 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
         )}
         {messages.map((msg) => (
-          <ChatMessage
-            key={msg.id}
-            message={msg.content}
-            response={msg.role === 'assistant' ? msg.content : undefined}
-            selectedText={msg.selectedText}
-            sender={msg.role === 'user' ? "user" : "ai"}
-            timestamp={msg.timestamp.toISOString()}
-          />
+          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+            <div className={`max-w-[80%] rounded-lg px-4 py-3 ${
+              msg.role === 'user'
+                ? 'bg-purple-600 text-white rounded-br-md'
+                : msg.error
+                  ? 'bg-red-900/20 border border-red-500/20 text-red-200 rounded-bl-md'
+                  : msg.loading
+                    ? 'bg-yellow-900/20 border border-yellow-500/20 text-yellow-200 rounded-bl-md'
+                    : 'bg-black/40 text-gray-200 border border-white/10 rounded-bl-md'
+            }`}>
+              <p className="text-sm">{msg.content}</p>
+              <div className="flex items-center gap-1 mt-2 text-xs opacity-70">
+                {msg.role === 'user' ? (
+                  <>
+                    <span>You</span>
+                    <span>•</span>
+                    <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>AI</span>
+                    <span>•</span>
+                    <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         ))}
         <div ref={chatEndRef} />
       </div>
@@ -277,20 +355,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       )}
 
-      {/* Input section - IMPROVED */}
+      {/* Input section - IMPROVED with larger textarea */}
       <div className="px-4 py-3 border-t border-white/10 bg-black/30 flex gap-2 items-end flex-shrink-0">
         <textarea
           ref={inputRef}  // NEW REF
           rows={1}
-          maxLength={1500}
-          className="flex-1 resize-none rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm disabled:opacity-50 transition min-h-[60px] max-h-[120px]"
+          maxLength={3000}
+          className="flex-1 resize-none rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm disabled:opacity-50 transition min-h-[80px] max-h-[200px]"
           placeholder={
             pendingSelectedText
               ? "Ask about the selected text..."
-              : "Type your message or select text from the PDF..."
+              : "Type your message, paste page content for flashcards, or select text from the PDF..."
           }
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           disabled={false} // Remove loading state from input to allow typing while AI responds
         />
@@ -308,7 +386,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       {/* Character count */}
       <div className="text-xs text-gray-500 px-4 pb-2 text-right">
-        {input.length}/1500
+        {input.length}/3000
       </div>
     </div>
   );

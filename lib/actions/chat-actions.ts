@@ -33,9 +33,10 @@ export async function sendMessageToAI({
     }
 
     // Generate AI response
-    const model = gemini.getGenerativeModel({
-      model: type === "chat" ? "gemini-1.5-flash" : "gemini-1.5-pro"
-    });
+    // const model = gemini.getGenerativeModel({
+    //   model: type === "chat" ? "gemini-1.5-flash" : "gemini-1.5-pro"
+    // });
+    const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const result = await model.generateContent(prompt);
     const response = result.response.text();

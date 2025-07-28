@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, ZoomIn, ZoomOut, LayoutPanelLeft, MessageCircle, Trash2, Loader2, Download, ExternalLink } from "lucide-react";
+import { ArrowLeft, ArrowRight, ZoomIn, ZoomOut, LayoutPanelLeft, MessageCircle, Trash2, Loader2, Download, ExternalLink, BookOpen } from "lucide-react";
 import { getPDFById, getPDFContent } from "@/app/actions/pdf-fetch";
 import TextSelectionPopup from "@/components/pdf/TextSelectionPopup";
 import ChatInterface from "@/components/pdf/ChatInterface";
 import PDFViewerClient from "@/components/pdf/PDFViewerClient";
+import FlashcardGenerator from "@/components/pdf/FlashcardGenerator";
+import FlashcardSets from "@/components/pdf/FlashcardSets";
 
 // --- RetroGrid copied from dashboard ---
 const RetroGrid = ({ angle = 65, cellSize = 60, opacity = 0.3, lineColor = "rgba(120,119,198,0.3)" }) => {
@@ -71,6 +73,11 @@ export default function PDFViewerPage() {
 
   // ✅ ADD: State to trigger clear chat
   const [clearChatTrigger, setClearChatTrigger] = useState(0);
+
+  // ✅ ADD: Active tab state for Chat/Flashcards
+  const [activeTab, setActiveTab] = useState<'chat' | 'flashcards'>('chat');
+  // ✅ ADD: New tab state for the improved navigation
+  const [activeTabNew, setActiveTabNew] = useState<'chat' | 'flashcards' | 'sets'>('chat');
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -372,32 +379,49 @@ export default function PDFViewerPage() {
     value={pageInput}
     onChange={(e) => {
       const value = e.target.value;
-      // Allow only numbers and empty string
+      // Allow only numbers and empty string, with validation against totalPages
       if (value === '' || /^\d+$/.test(value)) {
-        setPageInput(value);
+        const numValue = parseInt(value);
+        // Only allow if empty, or if number is within valid range
+        if (value === '' || (numValue >= 1 && numValue <= totalPages)) {
+          setPageInput(value);
+        }
       }
     }}
     onKeyDown={(e) => {
       if (e.key === 'Enter') {
         const newPage = parseInt(pageInput);
-        if (newPage >= 1 && newPage <= totalPages) {
+        if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
           setPage(newPage);
+        } else {
+          // Reset to current page if invalid
+          setPageInput(page.toString());
         }
         (e.target as HTMLInputElement).blur();
       }
     }}
     onBlur={() => {
       const pageNum = parseInt(pageInput);
-      if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+      if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages && pageNum !== page) {
         setPage(pageNum);
       } else {
         // Reset to current page if invalid
         setPageInput(page.toString());
       }
     }}
-    className="w-12 px-2 py-1 text-center bg-black/40 border border-white/10 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 flex-shrink-0"
+    className={`w-12 px-2 py-1 text-center bg-black/40 border rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 flex-shrink-0 transition-colors ${
+      pageInput && (parseInt(pageInput) < 1 || parseInt(pageInput) > totalPages)
+        ? 'border-red-500/50 bg-red-900/20'
+        : 'border-white/10'
+    }`}
+    placeholder={page.toString()}
+    title={`Enter page number (1-${totalPages})`}
   />
-  <span className="text-gray-400 flex-shrink-0">of {totalPages}</span>
+  <span className={`flex-shrink-0 ${
+    pageInput && (parseInt(pageInput) < 1 || parseInt(pageInput) > totalPages)
+      ? 'text-red-400'
+      : 'text-gray-400'
+  }`}>of {totalPages}</span>
   <span className="text-gray-400 flex-shrink-0">•</span>
   <span className="min-w-[32px] text-center flex-shrink-0">{Math.round(zoom * 100)}%</span>
 </div>
@@ -450,8 +474,7 @@ export default function PDFViewerPage() {
               className="p-2 rounded hover:bg-purple-900/20 transition"
               title="Clear chat history"
               onClick={() => {
-                // The clear chat functionality is handled within ChatInterface
-                // The confirmation dialog is already built into the component
+                // Trigger clear chat by incrementing the trigger
                 setClearChatTrigger(prev => prev + 1);
               }}
             >
@@ -459,19 +482,171 @@ export default function PDFViewerPage() {
             </button>
           </div>
 
+          {/* NEW: Improved Tab Navigation */}
+          <div className="flex border-b border-white/10 bg-black/20">
+            <button
+              onClick={() => setActiveTabNew('chat')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                activeTabNew === 'chat'
+                  ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-900/20'
+                  : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+              }`}
+            >
+              <div className="flex items-center gap-2 justify-center">
+                <span>💬</span>
+                <span>Chat</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTabNew('flashcards')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                activeTabNew === 'flashcards'
+                  ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-900/20'
+                  : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+              }`}
+            >
+              <div className="flex items-center gap-2 justify-center">
+                <span>📚</span>
+                <span>Flashcards</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTabNew('sets')}
+              className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+                activeTabNew === 'sets'
+                  ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-900/20'
+                  : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+              }`}
+            >
+              <div className="flex items-center gap-2 justify-center">
+                <span>📂</span>
+                <span>My Sets</span>
+              </div>
+            </button>
+          </div>
+
           {/* ✅ UPDATED: Chat messages area with new ChatInterface props */}
           <div className="flex-1 overflow-hidden">
-            <ChatInterface
-              pdfId={pdfId}
-              docTitle={pdfData?.filename}
-              selectedText={pendingChatText || undefined}  // ✅ Changed: Pass pending text instead of selectedText
-              chatAction={chatAction || undefined}         // ✅ NEW: Pass action type
-              onClearSelectedText={handleChatTextProcessed} // ✅ Changed: Use new callback
-              clearChatTrigger={clearChatTrigger}
-            />
+            {activeTabNew === 'chat' ? (
+              <ChatInterface
+                pdfId={pdfId}
+                docTitle={pdfData?.filename}
+                selectedText={pendingChatText || undefined}
+                chatAction={chatAction || undefined}
+                onClearSelectedText={handleChatTextProcessed}
+                clearChatTrigger={clearChatTrigger}
+              />
+            ) : activeTabNew === 'flashcards' ? (
+              <div className="flex flex-col h-full p-4">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-2">Generate Flashcards</h3>
+                  <p className="text-sm text-gray-400">Paste page content to create study cards</p>
+                </div>
+                <FlashcardGenerator
+                  pdfId={pdfId}
+                  pageNumber={page}
+                  docTitle={pdfData?.filename}
+                />
+              </div>
+            ) : activeTabNew === 'sets' ? (
+              <div className="flex flex-col h-full p-4">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-2">My Flashcard Sets</h3>
+                  <p className="text-sm text-gray-400">View and manage your saved sets</p>
+                </div>
+                <FlashcardSets pdfId={pdfId} />
+              </div>
+            ) : null}
           </div>
         </aside>
       </div>
+
+      {/* OLD: Keep for backward compatibility but hide */}
+      <aside className={`w-full md:w-2/5 flex flex-col bg-black/25 border-l border-white/10 h-[calc(100vh-120px)] transition-all duration-300 ${chatOpen ? "" : "hidden md:flex"} hidden`}>
+        {/* Header */}
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-white/10 bg-black/30 flex-shrink-0">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full blur-xl bg-purple-500/30" />
+            <MessageCircle className="relative w-8 h-8 text-purple-400" />
+          </div>
+          <div className="flex-1">
+            <div className="font-bold text-lg text-white">Ask about this PDF</div>
+            <div className="text-xs text-purple-300">
+              {loading ? "Loading..." : error ? "PDF unavailable" : "Ready to analyze document"}
+            </div>
+          </div>
+          <button
+            className="p-2 rounded hover:bg-purple-900/20 transition"
+            title="Clear chat history"
+            onClick={() => {
+              // Trigger clear chat by incrementing the trigger
+              setClearChatTrigger(prev => prev + 1);
+            }}
+          >
+            <Trash2 className="w-5 h-5 text-gray-400" />
+          </button>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-white/10 bg-black/20">
+          <button
+            onClick={() => setActiveTab('chat')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+              activeTab === 'chat'
+                ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-900/20'
+                : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+            }`}
+          >
+            <div className="flex items-center gap-2 justify-center">
+              <MessageCircle className="w-4 h-4" />
+              Chat
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('flashcards')}
+            className={`flex-1 px-4 py-3 text-sm font-medium transition ${
+              activeTab === 'flashcards'
+                ? 'text-purple-400 border-b-2 border-purple-400 bg-purple-900/20'
+                : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+            }`}
+          >
+            <div className="flex items-center gap-2 justify-center">
+              <BookOpen className="w-4 h-4" />
+              Flashcards
+            </div>
+          </button>
+        </div>
+
+        {/* ✅ UPDATED: Chat messages area with new ChatInterface props */}
+        <div className="flex-1 overflow-hidden">
+          {activeTab === 'chat' ? (
+            <ChatInterface
+              pdfId={pdfId}
+              docTitle={pdfData?.filename}
+              selectedText={pendingChatText || undefined}
+              chatAction={chatAction || undefined}
+              onClearSelectedText={handleChatTextProcessed}
+              clearChatTrigger={clearChatTrigger}
+            />
+          ) : (
+            <div className="flex flex-col h-full">
+              {/* Flashcard Generator */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <FlashcardGenerator
+                  pdfId={pdfId}
+                  pageNumber={page}
+                  docTitle={pdfData?.filename}
+                />
+              </div>
+
+              {/* Flashcard Sets */}
+              <div className="border-t border-white/10 p-4">
+                <FlashcardSets pdfId={pdfId} />
+              </div>
+            </div>
+          )}
+        </div>
+      </aside>
 
       {/* Mobile chat toggle button */}
       <button
