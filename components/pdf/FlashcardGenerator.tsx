@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Save, Sparkles, BookOpen, X, Play } from "lucide-react";
 import { generateFlashcardsWithAuth, saveFlashcardSetWithAuth, Flashcard } from "@/lib/actions/flashcard-actions";
@@ -9,9 +9,12 @@ interface FlashcardGeneratorProps {
   pdfId: string;
   pageNumber: number;
   docTitle?: string;
+  selectedText?: string;
+  chatAction?: 'add' | 'explain' | 'summarize';
+  onClearSelectedText?: () => void;
 }
 
-// Flashcard Preview Component
+// ✅ UPDATED: Responsive Flashcard Preview Component
 const FlashcardPreview: React.FC<{
   flashcards: Flashcard[];
   onSave: (title: string) => void;
@@ -31,29 +34,31 @@ const FlashcardPreview: React.FC<{
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4 mt-4"
+      className="space-y-3 sm:space-y-4 mt-3 sm:mt-4"
     >
+      {/* ✅ UPDATED: Responsive Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Generated Flashcards</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-white">Generated Flashcards</h3>
         <button
           onClick={onClose}
-          className="p-1 rounded hover:bg-white/10 transition"
+          className="p-1 sm:p-1.5 rounded hover:bg-white/10 transition"
         >
-          <X className="w-4 h-4 text-gray-400" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
         </button>
       </div>
 
-      <div className="space-y-3 max-h-48 overflow-y-auto">
+      {/* ✅ UPDATED: Responsive Flashcards List */}
+      <div className="space-y-2 sm:space-y-3 max-h-32 sm:max-h-48 overflow-y-auto custom-scrollbar">
         {flashcards.map((card, index) => (
           <div
             key={index}
-            className="bg-black/20 border border-white/10 rounded-lg p-3"
+            className="bg-black/20 border border-white/10 rounded-lg p-2 sm:p-3"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs bg-purple-600/50 text-purple-200 px-2 py-1 rounded">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+              <span className="text-xs bg-purple-600/50 text-purple-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                 Card {index + 1}
               </span>
-              <span className={`text-xs px-2 py-1 rounded ${
+              <span className={`text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded ${
                 card.difficulty_level === 'easy' ? 'bg-green-600/50 text-green-200' :
                 card.difficulty_level === 'medium' ? 'bg-yellow-600/50 text-yellow-200' :
                 'bg-red-600/50 text-red-200'
@@ -64,44 +69,49 @@ const FlashcardPreview: React.FC<{
             <div className="space-y-1">
               <div>
                 <span className="text-xs font-medium text-purple-300">Q:</span>
-                <p className="text-white text-xs mt-1 line-clamp-2">{card.question}</p>
+                <p className="text-white text-xs mt-0.5 sm:mt-1 line-clamp-2">{card.question}</p>
               </div>
               <div>
                 <span className="text-xs font-medium text-green-300">A:</span>
-                <p className="text-gray-300 text-xs mt-1 line-clamp-2">{card.answer}</p>
+                <p className="text-gray-300 text-xs mt-0.5 sm:mt-1 line-clamp-2">{card.answer}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex gap-2">
+      {/* ✅ UPDATED: Responsive Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-2">
         <button
           onClick={onStudy}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium text-sm"
+          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium text-xs sm:text-sm"
         >
-          <Play className="w-4 h-4" />
-          Study Now
+          <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Study Now</span>
+          <span className="sm:hidden">Study</span>
         </button>
         <button
           onClick={handleSave}
           disabled={!title.trim() || isSaving}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium text-sm"
+          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium text-xs sm:text-sm"
         >
           {isSaving ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Saving...
+              <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+              <span className="hidden sm:inline">Saving...</span>
+              <span className="sm:hidden">Save...</span>
             </>
           ) : (
             <>
-              <Save className="w-4 h-4" />
-              Save Set
+              <Save className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Save Set</span>
+              <span className="sm:hidden">Save</span>
             </>
           )}
         </button>
       </div>
 
+      {/* ✅ UPDATED: Responsive Input */}
       <div className="space-y-1">
         <label className="text-xs text-gray-300">Set Title:</label>
         <input
@@ -109,7 +119,7 @@ const FlashcardPreview: React.FC<{
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter a title for this flashcard set..."
-          className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+          className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm"
         />
       </div>
     </motion.div>
@@ -119,7 +129,10 @@ const FlashcardPreview: React.FC<{
 export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   pdfId,
   pageNumber,
-  docTitle
+  docTitle,
+  selectedText,
+  chatAction,
+  onClearSelectedText
 }) => {
   const [content, setContent] = useState("");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -134,12 +147,28 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     title: ""
   });
 
-  // Auto-resize functionality for textarea
+  // ✅ NEW: Handle selectedText prop for context-aware text selection
+  useEffect(() => {
+    if (selectedText && selectedText.trim()) {
+      setContent(selectedText.trim());
+      // Focus the textarea after setting content
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(selectedText.length, selectedText.length);
+      }
+      // Call the callback to clear the selected text
+      if (onClearSelectedText) {
+        onClearSelectedText();
+      }
+    }
+  }, [selectedText, onClearSelectedText]);
+
+  // ✅ UPDATED: Responsive auto-resize functionality
   const handleTextareaResize = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      const newHeight = Math.min(Math.max(textarea.scrollHeight, 120), 300);
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 80), window.innerWidth < 768 ? 200 : 300);
       textarea.style.height = newHeight + 'px';
     }
   }, []);
@@ -233,28 +262,28 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
-      {/* Header - Fixed */}
-      <div className="flex items-center gap-2 mb-4">
-        <BookOpen className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-semibold text-white">Generate Flashcards</h3>
+    <div className="flex flex-col h-full space-y-3 sm:space-y-4">
+      {/* ✅ UPDATED: Responsive Header */}
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+        <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+        <h3 className="text-base sm:text-lg font-semibold text-white">Generate Flashcards</h3>
       </div>
 
       {!showPreview ? (
         <>
-          {/* Content Area - Flex grow */}
-          <div className="flex-1 flex flex-col space-y-4">
-            {/* Content Input - Takes available space */}
+          {/* ✅ UPDATED: Responsive Content Area */}
+          <div className="flex-1 flex flex-col space-y-3 sm:space-y-4">
+            {/* ✅ UPDATED: Responsive Content Input */}
             <div className="flex-1">
-              <label htmlFor="content" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="content" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                 Page Content
               </label>
               <textarea
                 ref={textareaRef}
                 id="content"
-                rows={8}
+                rows={4}
                 maxLength={5000}
-                className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm resize-none transition"
+                className="w-full px-2 sm:px-3 py-2 sm:py-3 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm resize-none transition min-h-[80px] sm:min-h-[120px]"
                 placeholder="Paste the page content here to generate flashcards..."
                 value={content}
                 onChange={handleContentChange}
@@ -265,30 +294,32 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               </div>
             </div>
 
-            {/* Error Display - Fixed */}
+            {/* ✅ UPDATED: Responsive Error Display */}
             {error && (
-              <div className="text-red-400 text-sm bg-red-900/20 border border-red-500/20 rounded-lg p-3 flex-shrink-0">
+              <div className="text-red-400 text-xs sm:text-sm bg-red-900/20 border border-red-500/20 rounded-lg p-2 sm:p-3 flex-shrink-0">
                 ❌ {error}
               </div>
             )}
           </div>
 
-          {/* Generate Button - Always at bottom */}
-          <div className="flex-shrink-0 space-y-3">
+          {/* ✅ UPDATED: Responsive Generate Button */}
+          <div className="flex-shrink-0 space-y-2 sm:space-y-3">
             <button
               onClick={handleGenerate}
               disabled={!content.trim() || isGenerating}
-              className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded-lg flex items-center justify-center gap-2"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Generating Flashcards...
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                  <span className="hidden sm:inline">Generating Flashcards...</span>
+                  <span className="sm:hidden">Generating...</span>
                 </>
               ) : (
                 <>
-                  <BookOpen className="w-4 h-4" />
-                  Generate Flashcards
+                  <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Generate Flashcards</span>
+                  <span className="sm:hidden">Generate</span>
                 </>
               )}
             </button>
@@ -304,7 +335,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         />
       )}
 
-      {/* Study Mode Modal */}
+      {/* ✅ UPDATED: Responsive Study Mode Modal */}
       {studyMode.isOpen && (
         <FlashcardStudyView
           flashcards={studyMode.flashcards}

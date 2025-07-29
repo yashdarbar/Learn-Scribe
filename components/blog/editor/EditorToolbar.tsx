@@ -72,11 +72,13 @@ export default function EditorToolbar({ onAddBlock, selectedBlock, onFormatChang
   };
 
   return (
-    <div className="border-b border-white/10 bg-black/30 p-3">
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* Block type selector */}
-        <div className="flex items-center gap-1 border-r border-white/10 pr-3">
-          <span className="text-xs text-gray-400 mr-2">Blocks:</span>
+    <div className="border-b border-white/10 bg-black/30 p-2 sm:p-3">
+      {/* ✅ UPDATED: Responsive toolbar container */}
+      <div className="flex items-center gap-1 sm:gap-2 flex-wrap overflow-x-auto">
+        {/* ✅ UPDATED: Block type selector */}
+        <div className="flex items-center gap-1 border-r border-white/10 pr-2 sm:pr-3 flex-shrink-0">
+          <span className="text-xs text-gray-400 mr-1 sm:mr-2 hidden sm:inline">Blocks:</span>
+          <span className="text-xs text-gray-400 mr-1 sm:mr-2 sm:hidden">B:</span>
           {blockTypes.map((blockType, index) => {
             const Icon = blockType.icon;
             return (
@@ -85,19 +87,20 @@ export default function EditorToolbar({ onAddBlock, selectedBlock, onFormatChang
                 variant="ghost"
                 size="sm"
                 onClick={() => handleAddBlock(blockType.type)}
-                className="h-8 px-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="h-7 sm:h-8 px-1.5 sm:px-2 text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
                 title={blockType.label}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
               </Button>
             );
           })}
         </div>
 
-        {/* Text formatting */}
+        {/* ✅ UPDATED: Text formatting */}
         {selectedBlock && selectedBlock.type === 'paragraph' && (
-          <div className="flex items-center gap-1 border-r border-white/10 pr-3">
-            <span className="text-xs text-gray-400 mr-2">Format:</span>
+          <div className="flex items-center gap-1 border-r border-white/10 pr-2 sm:pr-3 flex-shrink-0">
+            <span className="text-xs text-gray-400 mr-1 sm:mr-2 hidden sm:inline">Format:</span>
+            <span className="text-xs text-gray-400 mr-1 sm:mr-2 sm:hidden">F:</span>
             {textFormats.map((format) => {
               const Icon = format.icon;
               return (
@@ -106,24 +109,25 @@ export default function EditorToolbar({ onAddBlock, selectedBlock, onFormatChang
                   variant="ghost"
                   size="sm"
                   onClick={() => handleFormat(format.format)}
-                  className={`h-8 px-2 transition-colors ${
+                  className={`h-7 sm:h-8 px-1.5 sm:px-2 transition-colors flex-shrink-0 ${
                     isFormatActive(format.format)
                       ? 'text-purple-400 bg-purple-500/20 border border-purple-500/30'
                       : 'text-gray-400 hover:text-white hover:bg-white/10'
                   }`}
                   title={format.label}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
               );
             })}
           </div>
         )}
 
-        {/* Alignment */}
+        {/* ✅ UPDATED: Alignment */}
         {selectedBlock && ['paragraph', 'heading'].includes(selectedBlock.type) && (
-          <div className="flex items-center gap-1 border-r border-white/10 pr-3">
-            <span className="text-xs text-gray-400 mr-2">Align:</span>
+          <div className="flex items-center gap-1 border-r border-white/10 pr-2 sm:pr-3 flex-shrink-0">
+            <span className="text-xs text-gray-400 mr-1 sm:mr-2 hidden sm:inline">Align:</span>
+            <span className="text-xs text-gray-400 mr-1 sm:mr-2 sm:hidden">A:</span>
             {alignments.map((alignment) => {
               const Icon = alignment.icon;
               return (
@@ -132,29 +136,30 @@ export default function EditorToolbar({ onAddBlock, selectedBlock, onFormatChang
                   variant="ghost"
                   size="sm"
                   onClick={() => handleFormat('align', alignment.value)}
-                  className={`h-8 px-2 transition-colors ${
+                  className={`h-7 sm:h-8 px-1.5 sm:px-2 transition-colors flex-shrink-0 ${
                     getAlignment() === alignment.value
                       ? 'text-purple-400 bg-purple-500/20 border border-purple-500/30'
                       : 'text-gray-400 hover:text-white hover:bg-white/10'
                   }`}
                   title={alignment.label}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
               );
             })}
           </div>
         )}
 
-        {/* Quick add button */}
+        {/* ✅ UPDATED: Quick add button */}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => handleAddBlock('paragraph')}
-          className="h-8 px-3 text-purple-400 hover:text-purple-300 hover:bg-purple-500/20 transition-colors border border-purple-500/30 hover:border-purple-500/50"
+          className="h-7 sm:h-8 px-2 sm:px-3 text-purple-400 hover:text-purple-300 hover:bg-purple-500/20 transition-colors border border-purple-500/30 hover:border-purple-500/50 flex-shrink-0"
         >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Block
+          <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+          <span className="hidden sm:inline">Add Block</span>
+          <span className="sm:hidden">Add</span>
         </Button>
       </div>
     </div>

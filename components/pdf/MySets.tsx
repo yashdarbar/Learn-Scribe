@@ -248,7 +248,7 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
       <div className="flex items-center justify-center py-8">
         <div className="flex items-center gap-2 text-gray-400">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-400"></div>
-          Loading study sets...
+          <span className="text-sm">Loading study sets...</span>
         </div>
       </div>
     );
@@ -294,7 +294,7 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
       <div className="flex border border-white/10 rounded-lg bg-black/20 overflow-hidden">
         <button
           onClick={() => setFilter('all')}
-          className={`flex-1 px-4 py-2 text-sm font-medium transition ${
+          className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
             filter === 'all'
               ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
               : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
@@ -304,7 +304,7 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
         </button>
         <button
           onClick={() => setFilter('flashcards')}
-          className={`flex-1 px-4 py-2 text-sm font-medium transition ${
+          className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
             filter === 'flashcards'
               ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
               : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
@@ -314,7 +314,7 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
         </button>
         <button
           onClick={() => setFilter('quizzes')}
-          className={`flex-1 px-4 py-2 text-sm font-medium transition ${
+          className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
             filter === 'quizzes'
               ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
               : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
@@ -332,18 +332,18 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
             key={`flashcard-${set.id}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-black/20 border border-white/10 rounded-lg p-4 backdrop-blur-xl hover:bg-black/30 transition"
+            className="bg-black/20 border border-white/10 rounded-lg p-3 sm:p-4 backdrop-blur-xl hover:bg-black/30 transition"
           >
             <div className="flex items-start justify-between">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <BookOpen className="w-4 h-4 text-purple-400" />
-                  <h4 className="font-medium text-white">{set.title}</h4>
-                  <span className="text-xs bg-purple-600/50 text-purple-200 px-2 py-1 rounded">
+                  <BookOpen className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                  <h4 className="font-medium text-white truncate">{set.title}</h4>
+                  <span className="text-xs bg-purple-600/50 text-purple-200 px-2 py-1 rounded flex-shrink-0">
                     Flashcards
                   </span>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-gray-400">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-gray-400">
                   <div className="flex items-center gap-1">
                     <FileText className="w-3 h-3" />
                     {set.flashcards?.length || 0} cards
@@ -360,7 +360,7 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                 <button
                   onClick={() => handleStudyFlashcards(set)}
                   disabled={!set.flashcards || set.flashcards.length === 0}
@@ -388,18 +388,18 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
             key={`quiz-${set.id}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-black/20 border border-white/10 rounded-lg p-4 backdrop-blur-xl hover:bg-black/30 transition"
+            className="bg-black/20 border border-white/10 rounded-lg p-3 sm:p-4 backdrop-blur-xl hover:bg-black/30 transition"
           >
             <div className="flex items-start justify-between">
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <MessageCircle className="w-4 h-4 text-blue-400" />
-                  <h4 className="font-medium text-white">{set.title}</h4>
-                  <span className="text-xs bg-blue-600/50 text-blue-200 px-2 py-1 rounded">
+                  <MessageCircle className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                  <h4 className="font-medium text-white truncate">{set.title}</h4>
+                  <span className="text-xs bg-blue-600/50 text-blue-200 px-2 py-1 rounded flex-shrink-0">
                     Quiz
                   </span>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-gray-400">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-gray-400">
                   <div className="flex items-center gap-1">
                     <FileText className="w-3 h-3" />
                     {set.quiz_questions?.length || 0} questions
@@ -416,7 +416,7 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                 <button
                   onClick={() => handleTakeQuiz(set)}
                   disabled={!set.quiz_questions || set.quiz_questions.length === 0}

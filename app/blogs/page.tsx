@@ -232,7 +232,7 @@ export default function BlogsPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
-                  <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+                  <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 hidden sm:block" />
                 </div>
                 <motion.div
                   whileHover={{ scale: 1.05 }}

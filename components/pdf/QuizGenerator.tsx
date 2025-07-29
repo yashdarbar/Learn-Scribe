@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Save, Sparkles, BookOpen, X, Play, CheckCircle, XCircle } from "lucide-react";
 import { generateQuizWithAuth, saveQuizSetWithAuth, QuizQuestion } from "@/lib/actions/quiz-actions";
@@ -9,9 +9,12 @@ interface QuizGeneratorProps {
   pdfId: string;
   pageNumber: number;
   docTitle?: string;
+  selectedText?: string;
+  chatAction?: 'add' | 'explain' | 'summarize';
+  onClearSelectedText?: () => void;
 }
 
-// Quiz Preview Component
+// ✅ UPDATED: Responsive Quiz Preview Component
 const QuizPreview: React.FC<{
   questions: QuizQuestion[];
   onSave: (title: string) => void;
@@ -31,29 +34,31 @@ const QuizPreview: React.FC<{
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4 mt-4"
+      className="space-y-3 sm:space-y-4 mt-3 sm:mt-4"
     >
+      {/* ✅ UPDATED: Responsive Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Generated Quiz Questions</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-white">Generated Quiz Questions</h3>
         <button
           onClick={onClose}
-          className="p-1 rounded hover:bg-white/10 transition"
+          className="p-1 sm:p-1.5 rounded hover:bg-white/10 transition"
         >
-          <X className="w-4 h-4 text-gray-400" />
+          <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
         </button>
       </div>
 
-      <div className="space-y-3 max-h-48 overflow-y-auto">
+      {/* ✅ UPDATED: Responsive Questions List */}
+      <div className="space-y-2 sm:space-y-3 max-h-32 sm:max-h-48 overflow-y-auto custom-scrollbar">
         {questions.map((question, index) => (
           <div
             key={index}
-            className="bg-black/20 border border-white/10 rounded-lg p-3"
+            className="bg-black/20 border border-white/10 rounded-lg p-2 sm:p-3"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs bg-purple-600/50 text-purple-200 px-2 py-1 rounded">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+              <span className="text-xs bg-purple-600/50 text-purple-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                 Question {index + 1}
               </span>
-              <span className={`text-xs px-2 py-1 rounded ${
+              <span className={`text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded ${
                 question.difficulty_level === 'easy' ? 'bg-green-600/50 text-green-200' :
                 question.difficulty_level === 'medium' ? 'bg-yellow-600/50 text-yellow-200' :
                 'bg-red-600/50 text-red-200'
@@ -62,43 +67,43 @@ const QuizPreview: React.FC<{
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               <div>
                 <span className="text-xs font-medium text-purple-300">Q:</span>
-                <p className="text-white text-xs mt-1 line-clamp-2">{question.question}</p>
+                <p className="text-white text-xs mt-0.5 sm:mt-1 line-clamp-2">{question.question}</p>
               </div>
 
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
+              <div className="space-y-0.5 sm:space-y-1">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
                     A
                   </span>
                   <span className="text-gray-300 text-xs line-clamp-1">{question.option_a}</span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
                     B
                   </span>
                   <span className="text-gray-300 text-xs line-clamp-1">{question.option_b}</span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
                     C
                   </span>
                   <span className="text-gray-300 text-xs line-clamp-1">{question.option_c}</span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center text-xs font-medium bg-gray-600 text-gray-300">
                     D
                   </span>
                   <span className="text-gray-300 text-xs line-clamp-1">{question.option_d}</span>
                 </div>
               </div>
 
-              <div className="mt-2 p-2 bg-blue-900/20 border border-blue-500/20 rounded text-xs text-blue-200">
+              <div className="mt-1 sm:mt-2 p-1.5 sm:p-2 bg-blue-900/20 border border-blue-500/20 rounded text-xs text-blue-200">
                 <span className="font-medium">💡 Hint:</span> Take the quiz to see explanations and correct answers!
               </div>
             </div>
@@ -106,33 +111,38 @@ const QuizPreview: React.FC<{
         ))}
       </div>
 
-      <div className="flex gap-2">
+      {/* ✅ UPDATED: Responsive Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-2">
         <button
           onClick={onTakeQuiz}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium text-sm"
+          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded-lg font-medium text-xs sm:text-sm"
         >
-          <Play className="w-4 h-4" />
-          Take Quiz Now
+          <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Take Quiz Now</span>
+          <span className="sm:hidden">Take Quiz</span>
         </button>
         <button
           onClick={handleSave}
           disabled={!title.trim() || isSaving}
-          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium text-sm"
+          className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium text-xs sm:text-sm"
         >
           {isSaving ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Saving...
+              <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+              <span className="hidden sm:inline">Saving...</span>
+              <span className="sm:hidden">Save...</span>
             </>
           ) : (
             <>
-              <Save className="w-4 h-4" />
-              Save Quiz
+              <Save className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Save Quiz</span>
+              <span className="sm:hidden">Save</span>
             </>
           )}
         </button>
       </div>
 
+      {/* ✅ UPDATED: Responsive Input */}
       <div className="space-y-1">
         <label className="text-xs text-gray-300">Quiz Title:</label>
         <input
@@ -140,7 +150,7 @@ const QuizPreview: React.FC<{
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Enter a title for this quiz..."
-          className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+          className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm"
         />
       </div>
     </motion.div>
@@ -150,7 +160,10 @@ const QuizPreview: React.FC<{
 export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   pdfId,
   pageNumber,
-  docTitle
+  docTitle,
+  selectedText,
+  chatAction,
+  onClearSelectedText
 }) => {
   const [content, setContent] = useState("");
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -166,12 +179,28 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
     quizSetId: undefined
   });
 
-  // Auto-resize functionality for textarea
+  // ✅ NEW: Handle selectedText prop for context-aware text selection
+  useEffect(() => {
+    if (selectedText && selectedText.trim()) {
+      setContent(selectedText.trim());
+      // Focus the textarea after setting content
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(selectedText.length, selectedText.length);
+      }
+      // Call the callback to clear the selected text
+      if (onClearSelectedText) {
+        onClearSelectedText();
+      }
+    }
+  }, [selectedText, onClearSelectedText]);
+
+  // ✅ UPDATED: Responsive auto-resize functionality
   const handleTextareaResize = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      const newHeight = Math.min(Math.max(textarea.scrollHeight, 120), 300);
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 80), window.innerWidth < 768 ? 200 : 300);
       textarea.style.height = newHeight + 'px';
     }
   }, []);
@@ -267,20 +296,20 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full space-y-4">
-      {/* Header - Fixed */}
-      <div className="flex items-center gap-2 mb-4">
-        <BookOpen className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-semibold text-white">Generate Quiz</h3>
+    <div className="flex flex-col h-full space-y-3 sm:space-y-4">
+      {/* ✅ UPDATED: Responsive Header */}
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
+        <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+        <h3 className="text-base sm:text-lg font-semibold text-white">Generate Quiz</h3>
       </div>
 
       {!showPreview ? (
         <>
-          {/* Content Area - Flex grow */}
-          <div className="flex-1 flex flex-col space-y-4">
-            {/* Content Input - Takes available space */}
-            <div className="flex-1 flex flex-col space-y-2">
-              <label className="text-sm text-gray-300">
+          {/* ✅ UPDATED: Responsive Content Area */}
+          <div className="flex-1 flex flex-col space-y-3 sm:space-y-4">
+            {/* ✅ UPDATED: Responsive Content Input */}
+            <div className="flex-1 flex flex-col space-y-1.5 sm:space-y-2">
+              <label className="text-xs sm:text-sm text-gray-300">
                 Paste page content to generate quiz questions from:
               </label>
               <textarea
@@ -288,11 +317,11 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
                 value={content}
                 onChange={handleContentChange}
                 placeholder="Paste the page content here... The AI will generate 5 multiple choice questions covering key concepts, facts, and applications from this content."
-                className="flex-1 min-h-[120px] max-h-[300px] resize-none rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm transition-all duration-200"
+                className="flex-1 min-h-[80px] sm:min-h-[120px] max-h-[200px] sm:max-h-[300px] resize-none rounded-lg bg-black/40 border border-white/10 px-2 sm:px-3 py-2 sm:py-3 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm transition-all duration-200"
                 maxLength={5000}
                 style={{
-                  height: '120px', // Fixed minimum height
-                  maxHeight: '300px' // Prevent over-expansion
+                  height: '80px', // Fixed minimum height
+                  maxHeight: window.innerWidth < 768 ? '200px' : '300px' // Responsive max height
                 }}
               />
               <div className="text-xs text-gray-500 text-right">
@@ -300,30 +329,32 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
               </div>
             </div>
 
-            {/* Error Display - Fixed */}
+            {/* ✅ UPDATED: Responsive Error Display */}
             {error && (
-              <div className="text-sm text-red-400 bg-red-900/10 border border-red-500/20 rounded-lg px-3 py-2">
+              <div className="text-xs sm:text-sm text-red-400 bg-red-900/10 border border-red-500/20 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2">
                 ❌ {error}
               </div>
             )}
           </div>
 
-          {/* Generate Button - Always at bottom */}
-          <div className="mt-4 pt-4 border-t border-white/10">
+          {/* ✅ UPDATED: Responsive Generate Button */}
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10">
             <button
               onClick={handleGenerate}
               disabled={!content.trim() || isGenerating}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium"
+              className="w-full flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition text-white rounded-lg font-medium text-xs sm:text-sm"
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Generating 5 Quiz Questions...
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                  <span className="hidden sm:inline">Generating 5 Quiz Questions...</span>
+                  <span className="sm:hidden">Generating...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5" />
-                  Generate 5 Quiz Questions
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Generate 5 Quiz Questions</span>
+                  <span className="sm:hidden">Generate Quiz</span>
                 </>
               )}
             </button>
@@ -339,7 +370,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
         />
       )}
 
-      {/* Quiz Mode Modal */}
+      {/* ✅ UPDATED: Responsive Quiz Mode Modal */}
       {quizMode.isOpen && (
         <QuizTakeView
           questions={quizMode.questions}

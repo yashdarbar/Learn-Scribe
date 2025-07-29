@@ -71,7 +71,7 @@ export default function EditorBlock({
   };
 
   const getBlockStyles = () => {
-    const baseStyles = "w-full p-3 rounded-lg border transition-all duration-200";
+    const baseStyles = "w-full p-2 sm:p-3 rounded-lg border transition-all duration-200";
     const focusStyles = isFocused
       ? "border-purple-500/50 bg-purple-500/10"
       : "border-white/10 bg-black/20 hover:border-white/20";
@@ -83,10 +83,10 @@ export default function EditorBlock({
     const alignment = block.attributes?.align || 'left';
     const textAlign = alignment === 'center' ? 'text-center' : alignment === 'right' ? 'text-right' : 'text-left';
 
-    let fontSize = 'text-base';
+    let fontSize = 'text-sm sm:text-base';
     if (block.type === 'heading') {
       const level = block.attributes?.level || 1;
-      fontSize = level === 1 ? 'text-3xl' : level === 2 ? 'text-2xl' : 'text-xl';
+      fontSize = level === 1 ? 'text-2xl sm:text-3xl' : level === 2 ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl';
     }
 
     return `${fontSize} ${textAlign} font-medium text-white leading-relaxed`;
@@ -126,7 +126,7 @@ export default function EditorBlock({
 
       case 'list':
         return (
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-2 sm:gap-3">
             <div className="mt-2 w-2 h-2 rounded-full bg-purple-400 flex-shrink-0" />
             <textarea
               ref={textareaRef}
@@ -136,7 +136,7 @@ export default function EditorBlock({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="List item..."
-              className="bg-transparent border-none outline-none resize-none w-full text-white leading-relaxed"
+              className="bg-transparent border-none outline-none resize-none w-full text-white leading-relaxed text-sm sm:text-base"
               style={{ minHeight: '2rem' }}
             />
           </div>
@@ -144,7 +144,7 @@ export default function EditorBlock({
 
       case 'quote':
         return (
-          <div className="border-l-4 border-purple-400 pl-4">
+          <div className="border-l-4 border-purple-400 pl-3 sm:pl-4">
             <textarea
               ref={textareaRef}
               value={block.content}
@@ -153,7 +153,7 @@ export default function EditorBlock({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="Quote..."
-              className="bg-transparent border-none outline-none resize-none w-full text-white italic leading-relaxed"
+              className="bg-transparent border-none outline-none resize-none w-full text-white italic leading-relaxed text-sm sm:text-base"
               style={{ minHeight: '2rem' }}
             />
           </div>
@@ -161,7 +161,7 @@ export default function EditorBlock({
 
       case 'code':
         return (
-          <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4">
+          <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-3 sm:p-4">
             <textarea
               ref={textareaRef}
               value={block.content}
@@ -170,7 +170,7 @@ export default function EditorBlock({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="Code..."
-              className="bg-transparent border-none outline-none resize-none w-full text-green-400 font-mono text-sm leading-relaxed"
+              className="bg-transparent border-none outline-none resize-none w-full text-green-400 font-mono text-xs sm:text-sm leading-relaxed"
               style={{ minHeight: '2rem' }}
             />
           </div>
@@ -186,13 +186,13 @@ export default function EditorBlock({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="Image URL..."
-              className="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-400"
+              className="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-400 text-sm sm:text-base"
             />
             {block.content && (
               <img
                 src={block.content}
                 alt="Block image"
-                className="w-full max-h-64 object-cover rounded-lg border border-white/10"
+                className="w-full max-h-48 sm:max-h-64 object-cover rounded-lg border border-white/10"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}
@@ -208,14 +208,14 @@ export default function EditorBlock({
 
   return (
     <div className="group relative">
-      {/* Block menu */}
-      <div className="absolute -left-12 top-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+      {/* ✅ UPDATED: Desktop block menu (left side) - hover visible with background */}
+      <div className="absolute -left-10 sm:-left-12 top-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 hidden lg:flex bg-black/80 backdrop-blur-sm rounded-lg p-1 border border-white/10">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onMove('up')}
           disabled={isFirst}
-          className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+          className="h-6 w-6 p-0 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
         >
           <ChevronUp className="w-3 h-3" />
         </Button>
@@ -224,7 +224,29 @@ export default function EditorBlock({
           size="sm"
           onClick={() => onMove('down')}
           disabled={isLast}
-          className="h-6 w-6 p-0 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+          className="h-6 w-6 p-0 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <ChevronDown className="w-3 h-3" />
+        </Button>
+      </div>
+
+      {/* ✅ UPDATED: Mobile block menu (top right) - hover visible with background */}
+      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 lg:hidden bg-black/80 backdrop-blur-sm rounded-lg p-1 border border-white/10">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onMove('up')}
+          disabled={isFirst}
+          className="h-7 w-7 p-0 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <ChevronUp className="w-3 h-3" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onMove('down')}
+          disabled={isLast}
+          className="h-7 w-7 p-0 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
         >
           <ChevronDown className="w-3 h-3" />
         </Button>
@@ -232,17 +254,31 @@ export default function EditorBlock({
           variant="ghost"
           size="sm"
           onClick={handleDelete}
-          className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200"
+          className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200"
         >
           <Trash2 className="w-3 h-3" />
         </Button>
       </div>
 
-      {/* Block content */}
+      {/* ✅ UPDATED: Desktop delete button (top right) - hover visible with background */}
+      <div className="absolute top-2 right-2 z-10 hidden lg:block opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/80 backdrop-blur-sm rounded-lg p-1 border border-white/10">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleDelete}
+          className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200"
+          title="Delete block"
+        >
+          <Trash2 className="w-3 h-3" />
+        </Button>
+      </div>
+
+      {/* ✅ UPDATED: Responsive block content */}
       <div className={getBlockStyles()}>
         <div className="flex items-start gap-2">
-          <div className="flex-shrink-0 mt-2">
-            <GripVertical className="w-4 h-4 text-gray-500" />
+          {/* ✅ UPDATED: Grip handle - hidden on mobile to save space */}
+          <div className="flex-shrink-0 mt-2 hidden lg:block">
+            <GripVertical className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
           </div>
           <div className="flex-1">
             {renderBlockContent()}
@@ -250,17 +286,17 @@ export default function EditorBlock({
         </div>
       </div>
 
-      {/* Link input modal */}
+      {/* ✅ UPDATED: Responsive link input modal */}
       {showLinkInput && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black/90 border border-white/10 rounded-lg p-4 w-96">
-            <h3 className="text-white font-medium mb-3">Add Link</h3>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-black/90 border border-white/10 rounded-lg p-3 sm:p-4 w-full max-w-sm sm:w-96">
+            <h3 className="text-white font-medium mb-3 text-sm sm:text-base">Add Link</h3>
             <input
               type="url"
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
               placeholder="https://example.com"
-              className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-black/40 border border-white/10 rounded text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
               autoFocus
             />
             <div className="flex gap-2 mt-3">
@@ -276,6 +312,7 @@ export default function EditorBlock({
                   setShowLinkInput(false);
                   setLinkUrl("");
                 }}
+                className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2"
               >
                 Add Link
               </Button>
@@ -286,6 +323,7 @@ export default function EditorBlock({
                   setShowLinkInput(false);
                   setLinkUrl("");
                 }}
+                className="text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2"
               >
                 Cancel
               </Button>
