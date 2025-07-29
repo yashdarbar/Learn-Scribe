@@ -63,7 +63,7 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
       description = "Write better blogs with AI assistance and turn any PDF into an interactive learning experience. Create, learn, and publish with intelligence.",
       ctaText = "Explore",
       ctaHref = "/login",
-      bottomImage = "https://farmui.vercel.app/dashboard.png",
+      bottomImage = "/hero-image.png", // Change this to your image filename
       gridOptions,
       ...props
     },

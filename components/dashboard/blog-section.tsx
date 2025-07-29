@@ -64,7 +64,7 @@ export function BlogSection() {
         {/* Secondary CTAs */}
         <div className="flex gap-2 mb-4">
           <Button asChild variant="default" size="sm" className="flex-1">
-            <Link href="/blogs">
+            <Link href="/editor">
               Start Writing Your First Blog
               <ExternalLink className="w-3 h-3 ml-2" />
             </Link>

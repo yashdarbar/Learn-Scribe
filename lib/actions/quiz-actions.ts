@@ -48,7 +48,7 @@ export async function generateQuizWithAuth(content: string, pdfId: string, pageN
     }
 
     const geminiClient = getGeminiClient();
-    const model = geminiClient.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Generate exactly 5 multiple choice quiz questions from the following content.
 Return ONLY a valid JSON array with no markdown formatting, code blocks, or additional text.

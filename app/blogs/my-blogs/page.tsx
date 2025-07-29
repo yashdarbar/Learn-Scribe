@@ -248,7 +248,7 @@ export default function MyBlogsPage() {
                 >
                   <Button
                     variant="ghost"
-                    onClick={() => router.back()}
+                    onClick={() => router.push("/blogs")}
                     className="p-2 hover:bg-white/10 text-gray-400 hover:text-gray-300 transition-all duration-300"
                   >
                     <ArrowLeft className="w-5 h-5" />
