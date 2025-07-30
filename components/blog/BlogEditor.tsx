@@ -620,7 +620,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                 {/* Mobile sidebar header */}
                 <div className="flex items-center justify-between p-4 border-b border-white/10">
                   <h3 className="text-lg font-semibold text-white">Blog Settings</h3>
-                  <Button size="sm" variant="ghost" onClick={() => setSidebarOpen(false)}>
+                  <Button size="sm" variant="default" onClick={() => setSidebarOpen(false)}>
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
