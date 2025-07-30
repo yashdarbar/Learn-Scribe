@@ -15,8 +15,8 @@ import { Toaster } from "react-hot-toast";
 // });
 
 export const metadata: Metadata = {
-  title: "Blog-Craft",
-  description: "Blog-Craft - AI-Powered PDF Learning Platform & Blogging",
+  title: "Learn-Scribe",
+  description: "Learn-Scribe - AI-Powered PDF Learning Platform & Blogging",
 };
 
 interface RootLayoutProps {

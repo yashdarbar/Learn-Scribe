@@ -124,7 +124,7 @@ export default function SignIn() {
               </div>
             </div>
             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
-              Blog-Craft
+              Learn-Scribe
             </span>
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
