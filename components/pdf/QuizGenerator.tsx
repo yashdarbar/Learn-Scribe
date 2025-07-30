@@ -307,23 +307,35 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
         <>
           {/* ✅ UPDATED: Responsive Content Area */}
           <div className="flex-1 flex flex-col space-y-3 sm:space-y-4">
-            {/* ✅ UPDATED: Responsive Content Input */}
+            {/* ✅ UPDATED: Responsive Content Input with Clear Button */}
             <div className="flex-1 flex flex-col space-y-1.5 sm:space-y-2">
               <label className="text-xs sm:text-sm text-gray-300">
                 Paste page content to generate quiz questions from:
               </label>
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={handleContentChange}
-                placeholder="Paste the page content here... The AI will generate 5 multiple choice questions covering key concepts, facts, and applications from this content."
-                className="flex-1 min-h-[80px] sm:min-h-[120px] max-h-[200px] sm:max-h-[300px] resize-none rounded-lg bg-black/40 border border-white/10 px-2 sm:px-3 py-2 sm:py-3 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm transition-all duration-200"
-                maxLength={5000}
-                style={{
-                  height: '80px', // Fixed minimum height
-                  maxHeight: window.innerWidth < 768 ? '200px' : '300px' // Responsive max height
-                }}
-              />
+              <div className="relative">
+                <textarea
+                  ref={textareaRef}
+                  value={content}
+                  onChange={handleContentChange}
+                  disabled={isGenerating}
+                  placeholder="Paste the page content here... The AI will generate 5 multiple choice questions covering key concepts, facts, and applications from this content."
+                  className="w-full min-h-[80px] sm:min-h-[120px] max-h-[200px] sm:max-h-[300px] resize-none rounded-lg bg-black/40 border border-white/10 px-2 sm:px-3 py-2 sm:py-3 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm transition-all duration-200"
+                  maxLength={5000}
+                  style={{
+                    height: '80px', // Fixed minimum height
+                    maxHeight: window.innerWidth < 768 ? '200px' : '300px' // Responsive max height
+                  }}
+                />
+                {content.trim() && (
+                  <button
+                    onClick={() => setContent("")}
+                    className="absolute top-2 right-3 p-1 rounded bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white transition"
+                    title="Clear content"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
               <div className="text-xs text-gray-500 text-right">
                 {content.length}/5000 characters
               </div>

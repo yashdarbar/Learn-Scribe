@@ -197,7 +197,7 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
 
               <div className="flex items-center gap-3">
                 <Button
-                  variant="ghost"
+                  variant="default"
                   size="sm"
                   onClick={handleLike}
                   className={`flex items-center gap-2 ${
@@ -210,7 +210,7 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
 
                 <div className="relative">
                   <Button
-                    variant="ghost"
+                    variant="default"
                     size="sm"
                     onClick={() => setShowShareMenu(!showShareMenu)}
                     className="text-gray-400 hover:text-white"
@@ -228,7 +228,7 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
                       >
                         <div className="flex gap-2">
                           <Button
-                            variant="ghost"
+                            variant="default"
                             size="sm"
                             onClick={() => handleShare('twitter')}
                             className="text-gray-400 hover:text-blue-400"
@@ -236,7 +236,7 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
                             <Twitter className="w-4 h-4" />
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="default"
                             size="sm"
                             onClick={() => handleShare('facebook')}
                             className="text-gray-400 hover:text-blue-600"
@@ -244,21 +244,21 @@ export default function BlogReader({ blogSlug, onClose }: BlogReaderProps) {
                             <Facebook className="w-4 h-4" />
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="default"
                             size="sm"
                             onClick={() => handleShare('linkedin')}
                             className="text-gray-400 hover:text-blue-700"
                           >
                             <Linkedin className="w-4 h-4" />
                           </Button>
-                          <Button
+                          {/* <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleShare('copy')}
                             className="text-gray-400 hover:text-white"
                           >
                             <ExternalLink className="w-4 h-4" />
-                          </Button>
+                          </Button> */}
                         </div>
                       </motion.div>
                     )}

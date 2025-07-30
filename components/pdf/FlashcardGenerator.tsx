@@ -278,17 +278,28 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
               <label htmlFor="content" className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                 Page Content
               </label>
-              <textarea
-                ref={textareaRef}
-                id="content"
-                rows={4}
-                maxLength={5000}
-                className="w-full px-2 sm:px-3 py-2 sm:py-3 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm resize-none transition min-h-[80px] sm:min-h-[120px]"
-                placeholder="Paste the page content here to generate flashcards..."
-                value={content}
-                onChange={handleContentChange}
-                disabled={isGenerating}
-              />
+              <div className="relative">
+                <textarea
+                  ref={textareaRef}
+                  id="content"
+                  rows={4}
+                  maxLength={5000}
+                  className="w-full px-2 sm:px-3 py-2 sm:py-3 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm resize-none transition min-h-[80px] sm:min-h-[120px]"
+                  placeholder="Paste the page content here to generate flashcards..."
+                  value={content}
+                  onChange={handleContentChange}
+                  disabled={isGenerating}
+                />
+                {content.trim() && (
+                  <button
+                    onClick={() => setContent("")}
+                    className="absolute top-2 right-3 p-1 rounded bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 hover:text-white transition"
+                    title="Clear content"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
               <div className="text-xs text-gray-500 mt-1 text-right">
                 {content.length}/5000
               </div>

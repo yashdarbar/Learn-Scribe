@@ -76,7 +76,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
   // ✅ UPDATED: Handle back button click
   const handleBack = () => {
     // Navigate to my-blogs page
-    window.location.href = '/blogs/my-blogs';
+    window.location.href = '/blogs';
   };
 
   // ✅ UPDATED: Handle sidebar toggle

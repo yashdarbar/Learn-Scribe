@@ -129,21 +129,21 @@ export default function BlogEngagement({
             </Button>
           </div>
 
-          <Button
+          {/* <Button
             variant="default"
             className="flex items-center gap-2 text-gray-400 hover:text-white"
           >
             <MessageCircle className="w-5 h-5" />
             <span>Comment</span>
-          </Button>
+          </Button> */}
 
-          <Button
+          {/* <Button
             variant="default"
             className="flex items-center gap-2 text-gray-400 hover:text-white"
           >
             <Bookmark className="w-5 h-5" />
             <span>Save</span>
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -163,10 +163,10 @@ export default function BlogEngagement({
             <p className="text-gray-400 text-sm mb-3">
               Author of this blog post
             </p>
-            <Button variant="default" size="sm">
+            {/* <Button variant="default" size="sm">
               <User className="w-4 h-4 mr-2" />
               View Profile
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

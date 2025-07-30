@@ -36,11 +36,11 @@ function EditorContent() {
 
   const handlePublish = (blog: any) => {
     console.log('Blog published:', blog);
-    router.push('/blogs/my-blogs');
+    router.push('/blogs');
   };
 
   const handleClose = () => {
-    router.push('/blogs/my-blogs');
+    router.push('/blogs');
   };
 
   if (isLoading) {
