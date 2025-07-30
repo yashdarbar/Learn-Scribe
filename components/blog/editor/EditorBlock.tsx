@@ -7,10 +7,12 @@ import {
   Trash2,
   GripVertical,
   Image as ImageIcon,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EditorBlock as EditorBlockType } from "@/types/blog";
+import SimpleAIAssistant from "./SimpleAIAssistant";
 
 interface EditorBlockProps {
   block: EditorBlockType;
@@ -20,6 +22,7 @@ interface EditorBlockProps {
   onAddAfter: (type: EditorBlockType['type']) => void;
   isFirst: boolean;
   isLast: boolean;
+  allBlocks?: EditorBlockType[];
 }
 
 export default function EditorBlock({
@@ -29,13 +32,16 @@ export default function EditorBlock({
   onMove,
   onAddAfter,
   isFirst,
-  isLast
+  isLast,
+  allBlocks = []
 }: EditorBlockProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [linkUrl, setLinkUrl] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(0);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -47,6 +53,8 @@ export default function EditorBlock({
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onUpdate({ content: e.target.value });
+    // Track cursor position
+    setCursorPosition(e.target.selectionStart || 0);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -54,20 +62,52 @@ export default function EditorBlock({
       e.preventDefault();
       onAddAfter('paragraph');
     }
-    // Removed the Backspace deletion logic - now deletion only happens via delete button
+    // Track cursor position on key events
+    if (e.currentTarget instanceof HTMLTextAreaElement) {
+      setCursorPosition(e.currentTarget.selectionStart || 0);
+    }
   };
 
-  //   const handleKeyDown = (e: React.KeyboardEvent) => {
-  //   if (e.key === 'Enter' && !e.shiftKey) {
-  //     e.preventDefault();
-  //     onAddAfter('paragraph');
-  //   }
-  //   // Removed the Backspace deletion logic - now deletion only happens via delete button
-  // };
+  const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    setIsFocused(true);
+    setCursorPosition(e.target.selectionStart || 0);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+    setCursorPosition(e.currentTarget.selectionStart || 0);
+  };
 
   const handleDelete = () => {
     console.log('EditorBlock handleDelete called for block:', block.id);
     onDelete();
+  };
+
+  const handleAIAccept = (content: string, mode: 'append' | 'replace' | 'insert') => {
+    let newContent = block.content;
+
+    switch (mode) {
+      case 'append':
+        // Add space if content doesn't end with space and isn't empty
+        const needsSpace = block.content.length > 0 && !block.content.endsWith(' ') && !block.content.endsWith('\n');
+        newContent = block.content + (needsSpace ? ' ' : '') + content;
+        break;
+      case 'replace':
+        newContent = content;
+        break;
+      case 'insert':
+        // Insert at cursor position
+        const before = block.content.substring(0, cursorPosition);
+        const after = block.content.substring(cursorPosition);
+        newContent = before + content + after;
+        break;
+    }
+
+    onUpdate({ content: newContent });
+    setShowAIAssistant(false);
   };
 
   const getBlockStyles = () => {
@@ -101,8 +141,9 @@ export default function EditorBlock({
             value={block.content}
             onChange={handleContentChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onClick={handleClick}
             placeholder="Start writing..."
             className={`${getTextStyles()} bg-transparent border-none outline-none resize-none w-full min-h-[2rem]`}
             style={{ minHeight: '2rem' }}
@@ -116,8 +157,9 @@ export default function EditorBlock({
             value={block.content}
             onChange={handleContentChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onClick={handleClick}
             placeholder="Heading..."
             className={`${getTextStyles()} bg-transparent border-none outline-none resize-none w-full min-h-[2rem]`}
             style={{ minHeight: '2rem' }}
@@ -133,8 +175,9 @@ export default function EditorBlock({
               value={block.content}
               onChange={handleContentChange}
               onKeyDown={handleKeyDown}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onClick={handleClick}
               placeholder="List item..."
               className="bg-transparent border-none outline-none resize-none w-full text-white leading-relaxed text-sm sm:text-base"
               style={{ minHeight: '2rem' }}
@@ -150,8 +193,9 @@ export default function EditorBlock({
               value={block.content}
               onChange={handleContentChange}
               onKeyDown={handleKeyDown}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onClick={handleClick}
               placeholder="Quote..."
               className="bg-transparent border-none outline-none resize-none w-full text-white italic leading-relaxed text-sm sm:text-base"
               style={{ minHeight: '2rem' }}
@@ -167,8 +211,9 @@ export default function EditorBlock({
               value={block.content}
               onChange={handleContentChange}
               onKeyDown={handleKeyDown}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onClick={handleClick}
               placeholder="Code..."
               className="bg-transparent border-none outline-none resize-none w-full text-green-400 font-mono text-xs sm:text-sm leading-relaxed"
               style={{ minHeight: '2rem' }}
@@ -206,6 +251,9 @@ export default function EditorBlock({
     }
   };
 
+  // Get all block contents for context
+  const allBlockContents = allBlocks.map(b => b.content).filter(content => content.trim());
+
   return (
     <div className="group relative">
       {/* ✅ UPDATED: Desktop block menu (left side) - hover visible with background */}
@@ -230,46 +278,45 @@ export default function EditorBlock({
         </Button>
       </div>
 
-      {/* ✅ UPDATED: Mobile block menu (top right) - hover visible with background */}
-      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 lg:hidden bg-black/80 backdrop-blur-sm rounded-lg p-1 border border-white/10">
+      {/* ✅ UPDATED: All layouts - Single row with all four buttons */}
+      <div className="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 bg-black/80 backdrop-blur-sm rounded-lg p-2 border border-white/10">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onMove('up')}
           disabled={isFirst}
-          className="h-7 w-7 p-0 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+          className="h-8 w-8 p-0 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+          title="Move up"
         >
-          <ChevronUp className="w-3 h-3" />
+          <ChevronUp className="w-4 h-4" />
         </Button>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onMove('down')}
           disabled={isLast}
-          className="h-7 w-7 p-0 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+          className="h-8 w-8 p-0 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+          title="Move down"
         >
-          <ChevronDown className="w-3 h-3" />
+          <ChevronDown className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowAIAssistant(!showAIAssistant)}
+          className="h-8 w-8 p-0 text-purple-400 hover:text-purple-300 hover:bg-purple-500/20 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-200"
+          title="AI Assistant"
+        >
+          <Sparkles className="w-4 h-4" />
         </Button>
         <Button
           variant="ghost"
           size="sm"
           onClick={handleDelete}
-          className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200"
-        >
-          <Trash2 className="w-3 h-3" />
-        </Button>
-      </div>
-
-      {/* ✅ UPDATED: Desktop delete button (top right) - hover visible with background */}
-      <div className="absolute top-2 right-2 z-10 hidden lg:block opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/80 backdrop-blur-sm rounded-lg p-1 border border-white/10">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleDelete}
-          className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200"
+          className="h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200"
           title="Delete block"
         >
-          <Trash2 className="w-3 h-3" />
+          <Trash2 className="w-4 h-4" />
         </Button>
       </div>
 
@@ -285,6 +332,17 @@ export default function EditorBlock({
           </div>
         </div>
       </div>
+
+      {/* Enhanced AI Assistant */}
+      <SimpleAIAssistant
+        currentContent={block.content}
+        cursorPosition={cursorPosition}
+        onAccept={handleAIAccept}
+        onClose={() => setShowAIAssistant(false)}
+        isVisible={showAIAssistant}
+        blockType={block.type}
+        allBlocks={allBlockContents}
+      />
 
       {/* ✅ UPDATED: Responsive link input modal */}
       {showLinkInput && (

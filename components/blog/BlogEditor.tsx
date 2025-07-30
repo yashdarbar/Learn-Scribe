@@ -361,193 +361,199 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex flex-col">
       {/* ✅ UPDATED: Responsive Header with proper mobile layout */}
-      <header className="border-b border-white/10 bg-black/50">
-        {/* ✅ Mobile: Two-row layout */}
-        <div className="flex flex-col sm:hidden">
-          {/* Navigation row */}
-          <div className="flex items-center justify-between p-3">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Button
-                size="sm"
-                variant="default"
-                onClick={handleBack}
-                className="p-2 h-10 w-10 flex-shrink-0"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <FileText className="w-4 h-4 text-purple-400 flex-shrink-0" />
-              <span className="text-sm font-semibold text-white truncate">
-                {blogId ? 'Edit Blog' : 'Write New Blog'}
-              </span>
-            </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={onClose}
-              className="p-2 h-10 w-10 flex-shrink-0"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+      {/* // Replace your existing header section with this responsive version */}
 
-          {/* Actions row */}
-          <div className="flex items-center justify-between px-3 pb-3">
-            <Button
-              size="sm"
-              variant="default"
-              onClick={toggleSidebar}
-              className="flex items-center gap-1 px-3 py-2"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="text-xs">Settings</span>
-            </Button>
+<header className="border-b border-white/10 bg-black/50">
+  {/* Mobile Header (Below 750px) */}
+  <div className="flex max-[750px]:flex min-[750px]:hidden items-center justify-between p-3">
+    {/* Left side - Back button, icon, title */}
+    <div className="flex items-center gap-2 flex-1 min-w-0">
+      <Button
+        size="sm"
+        variant="default"
+        onClick={handleBack}
+        className="p-2 h-9 w-9 flex-shrink-0"
+      >
+        <ArrowLeft className="w-4 h-4" />
+      </Button>
+      <FileText className="w-4 h-4 text-purple-400 flex-shrink-0" />
+      <span className="text-sm font-semibold text-white truncate">
+        {blogId ? 'Edit Blog' : 'Write New Blog'}
+      </span>
+    </div>
 
-            <div className="flex items-center gap-1">
-              {/* Status indicator */}
-              <div className="flex items-center gap-1 mr-2">
-                {status === 'draft' ?
-                  <Lock className="w-3 h-3 text-gray-400" /> :
-                  <Globe className="w-3 h-3 text-green-400" />
-                }
-              </div>
+    {/* Right side - Settings and action buttons */}
+    <div className="flex items-center gap-1">
+      {/* Settings button */}
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={toggleSidebar}
+        className="p-2 h-9 w-9"
+      >
+        <Settings className="w-4 h-4" />
+      </Button>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowPreview(!showPreview)}
-                className="px-2 py-2 h-10 w-10"
-              >
-                {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </Button>
+      {/* Status indicator */}
+      <div className="px-1">
+        {status === 'draft' ? (
+          <Lock className="w-4 h-4 text-gray-400" />
+        ) : (
+          <Globe className="w-4 h-4 text-green-400" />
+        )}
+      </div>
 
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleSave}
-                disabled={isSaving}
-                className="px-2 py-2 h-10 w-10"
-              >
-                {isSaving ?
-                  <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin" /> :
-                  <Save className="w-4 h-4" />
-                }
-              </Button>
+      {/* Preview button */}
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => setShowPreview(!showPreview)}
+        className="p-2 h-9 w-9"
+      >
+        {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </Button>
 
-              <Button
-                size="sm"
-                onClick={handlePublish}
-                disabled={isPublishing || !title.trim()}
-                className="px-2 py-2 h-10 w-10"
-              >
-                {isPublishing ?
-                  <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin" /> :
-                  <Globe className="w-4 h-4" />
-                }
-              </Button>
-            </div>
-          </div>
+      {/* Save button */}
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={handleSave}
+        disabled={isSaving}
+        className="p-2 h-9 w-9"
+      >
+        {isSaving ? (
+          <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <Save className="w-4 h-4" />
+        )}
+      </Button>
+
+      {/* Publish button */}
+      <Button
+        size="sm"
+        onClick={handlePublish}
+        disabled={isPublishing || !title.trim()}
+        className="p-2 h-9 w-9"
+      >
+        {isPublishing ? (
+          <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <Globe className="w-4 h-4" />
+        )}
+      </Button>
+
+      {/* Close button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClose}
+        className="p-2 h-9 w-9"
+      >
+        <X className="w-4 h-4" />
+      </Button>
+    </div>
+  </div>
+
+  {/* Desktop Header (Above 750px) - Keep your existing desktop header */}
+  <div className="hidden min-[750px]:flex items-center justify-between p-4">
+    <div className="flex items-center gap-4">
+      <Button
+        size="sm"
+        variant="default"
+        onClick={handleBack}
+        className="p-2"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </Button>
+      <div className="flex items-center gap-2">
+        <FileText className="w-5 h-5 text-purple-400" />
+        <span className="text-lg font-semibold text-white">
+          {blogId ? 'Edit Blog' : 'Write New Blog'}
+        </span>
+      </div>
+    </div>
+
+    <div className="flex items-center gap-3">
+      {/* Status indicator */}
+      <div className="flex items-center gap-2 text-sm">
+        {status === 'draft' ? (
+          <Lock className="w-4 h-4 text-gray-400" />
+        ) : (
+          <Globe className="w-4 h-4 text-green-400" />
+        )}
+        <span className={status === 'draft' ? 'text-gray-400' : 'text-green-400'}>
+          {status === 'draft' ? 'Draft' : 'Published'}
+        </span>
+      </div>
+
+      {/* Word count and read time */}
+      <div className="flex items-center gap-4 text-sm text-gray-400">
+        <span>{wordCount} words</span>
+        <span>•</span>
+        <span>{readTime} min read</span>
+      </div>
+
+      {/* Save status */}
+      {lastSaved && (
+        <div className="flex items-center gap-1 text-xs text-gray-500">
+          <CheckCircle className="w-3 h-3" />
+          <span>Saved {lastSaved.toLocaleTimeString()}</span>
         </div>
+      )}
 
-        {/* ✅ Desktop: Single row layout */}
-        <div className="hidden sm:flex items-center justify-between p-4">
-          <div className="flex items-center gap-4">
-            <Button
-              size="sm"
-              variant="default"
-              onClick={handleBack}
-              className="p-2"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-purple-400" />
-              <span className="text-lg font-semibold text-white">
-                {blogId ? 'Edit Blog' : 'Write New Blog'}
-              </span>
-            </div>
-          </div>
+      {/* Action buttons */}
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowPreview(!showPreview)}
+          className="flex items-center gap-2"
+        >
+          {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          Preview
+        </Button>
 
-          <div className="flex items-center gap-3">
-            {/* Status indicator */}
-            <div className="flex items-center gap-2 text-sm">
-              {status === 'draft' ? (
-                <Lock className="w-4 h-4 text-gray-400" />
-              ) : (
-                <Globe className="w-4 h-4 text-green-400" />
-              )}
-              <span className={status === 'draft' ? 'text-gray-400' : 'text-green-400'}>
-                {status === 'draft' ? 'Draft' : 'Published'}
-              </span>
-            </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="flex items-center gap-2"
+        >
+          {isSaving ? (
+            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          Save
+        </Button>
 
-            {/* Word count and read time */}
-            <div className="flex items-center gap-4 text-sm text-gray-400">
-              <span>{wordCount} words</span>
-              <span>•</span>
-              <span>{readTime} min read</span>
-            </div>
+        <Button
+          size="sm"
+          onClick={handlePublish}
+          disabled={isPublishing || !title.trim()}
+          className="flex items-center gap-2"
+        >
+          {isPublishing ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Globe className="w-4 h-4" />
+          )}
+          {blogId ? 'Update Blog' : 'Publish'}
+        </Button>
 
-            {/* Save status */}
-            {lastSaved && (
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <CheckCircle className="w-3 h-3" />
-                <span>Saved {lastSaved.toLocaleTimeString()}</span>
-              </div>
-            )}
-
-            {/* Action buttons */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPreview(!showPreview)}
-                className="flex items-center gap-2"
-              >
-                {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                Preview
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSave}
-                disabled={isSaving}
-                className="flex items-center gap-2"
-              >
-                {isSaving ? (
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                Save
-              </Button>
-
-              <Button
-                size="sm"
-                onClick={handlePublish}
-                disabled={isPublishing || !title.trim()}
-                className="flex items-center gap-2"
-              >
-                {isPublishing ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Globe className="w-4 h-4" />
-                )}
-                {blogId ? 'Update Blog' : 'Publish'}
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="p-2"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          className="p-2"
+        >
+          <X className="w-5 h-5" />
+        </Button>
+      </div>
+    </div>
+  </div>
+</header>
 
       {/* ✅ UPDATED: Error/Success messages - responsive */}
       <AnimatePresence>
@@ -838,6 +844,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                     onAddAfter={(type) => addBlock(type, block.id)}
                     isFirst={index === 0}
                     isLast={index === content.blocks.length - 1}
+                    allBlocks={content.blocks}
                   />
                 ))}
 
