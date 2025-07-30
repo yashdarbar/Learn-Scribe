@@ -104,9 +104,9 @@ export function AuthForm({
       // console.log(`Google ${isLogin ? 'login' : 'signup'} clicked`)
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        // options: {
-        //   redirectTo: `${window.location.origin}/dashboard`,
-        // },
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
       });
 
     } catch (error) {

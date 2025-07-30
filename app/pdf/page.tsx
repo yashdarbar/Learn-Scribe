@@ -39,6 +39,7 @@ export default function PdfLibraryPage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [headerLoading, setHeaderLoading] = useState(false);
+  const [uploadingSample, setUploadingSample] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -142,9 +143,33 @@ export default function PdfLibraryPage() {
 
   // Handle successful upload and navigation
   const handleUploadSuccess = (pdfId: string) => {
-    console.log('✅ PDF uploaded successfully with ID:', pdfId);
     setUploadModalOpen(false);
     refreshPDFs(); // Refresh the PDF list
+  };
+
+  // Handle sample PDF upload
+  const handleUploadSample = async () => {
+    setUploadingSample(true);
+    setError(null);
+
+    try {
+      const { uploadSamplePdf } = await import('@/app/actions/sample-upload');
+      const result = await uploadSamplePdf();
+
+      if (result.success) {
+        await refreshPDFs(); // Refresh the PDF list
+        console.log('✅ Sample PDF uploaded:', result.data);
+        // Navigate to the uploaded PDF
+        router.push(`/pdf/${result.data.id}`);
+      } else {
+        setError(result.error || 'Failed to upload sample PDF');
+      }
+    } catch (error) {
+      console.error('Error uploading sample PDF:', error);
+      setError('Failed to upload sample PDF');
+    } finally {
+      setUploadingSample(false);
+    }
   };
 
   return (
@@ -209,18 +234,45 @@ export default function PdfLibraryPage() {
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
               <h1 className="text-3xl font-bold text-white mb-2 md:mb-0">PDF Learning Hub</h1>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                <Button
-                  className="w-full md:w-auto bg-gradient-to-r from-purple-600/80 to-purple-700/80 hover:from-purple-600 hover:to-purple-700 border border-purple-500/30 hover:border-purple-500/50 text-white shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
-                  onClick={() => setUploadModalOpen(true)}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <Plus className="w-4 h-4 mr-2" /> Upload New PDF
-                </Button>
-              </motion.div>
+                  <Button
+                    className="w-full md:w-auto bg-gradient-to-r from-purple-600/80 to-purple-700/80 hover:from-purple-600 hover:to-purple-700 border border-purple-500/30 hover:border-purple-500/50 text-white shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
+                    onClick={() => setUploadModalOpen(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" /> Upload New PDF
+                  </Button>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Button
+                    onClick={handleUploadSample}
+                    disabled={uploadingSample}
+                    variant="outline"
+                    className="w-full md:w-auto border-purple-500/50 hover:border-purple-500 text-purple-300 hover:text-white hover:bg-purple-600/20"
+                  >
+                    {uploadingSample ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Loading Sample...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-4 h-4 mr-2" />
+                        Try Sample PDF
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+              </div>
             </div>
 
             {/* PDF Cards Grid */}
