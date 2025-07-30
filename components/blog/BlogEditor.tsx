@@ -675,7 +675,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                   </div>
 
                   {/* Cover Image */}
-                  <div>
+                  {/* <div>
                     <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                       Cover Image URL
                     </label>
@@ -698,7 +698,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                         />
                       </div>
                     )}
-                  </div>
+                  </div> */}
 
                   {/* Statistics */}
                   <div className="space-y-1 sm:space-y-2">
@@ -772,7 +772,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
             </div>
 
             {/* Cover Image */}
-            <div>
+            {/* <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
                 Cover Image URL
               </label>
@@ -795,7 +795,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                   />
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* Statistics */}
             <div className="space-y-1 sm:space-y-2">

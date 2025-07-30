@@ -195,14 +195,14 @@ export function AuthForm({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password" className="text-sm font-medium text-gray-300">Password</Label>
-                {isLogin && (
+                {/* {isLogin && (
                   <a
                     href="#"
                     className="text-xs text-purple-400 hover:text-purple-300 underline"
                   >
                     Forgot your password?
                   </a>
-                )}
+                )} */}
               </div>
               <Input
                 id="password"
@@ -248,7 +248,7 @@ export function AuthForm({
               href={isLogin ? "/signup" : "/login"}
               className="text-purple-400 hover:text-purple-300 underline"
             >
-              {isLogin ? "Sign up" : "Sign in"}
+              {isLogin ? "Sign up" : "Login"}
             </Link>
           </div>
         </form>

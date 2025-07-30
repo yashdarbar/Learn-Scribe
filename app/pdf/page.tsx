@@ -4,12 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
-import { Plus, FileText, Loader2, AlertCircle, ArrowLeft, LogOut } from "lucide-react";
+import { Plus, FileText, Loader2, AlertCircle, ArrowLeft, LogOut, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { PdfUploadModal } from "@/components/PdfUploadModal";
 import { getUserPDFs } from "@/app/actions/pdf-fetch";
+import { deletePDF } from "@/app/actions/pdf-delete";
 import { createClient } from "@/utils/supabase/client";
 
 // --- RetroGrid copied from dashboard ---
@@ -40,6 +41,9 @@ export default function PdfLibraryPage() {
   const [user, setUser] = useState<any>(null);
   const [headerLoading, setHeaderLoading] = useState(false);
   const [uploadingSample, setUploadingSample] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [pdfToDelete, setPdfToDelete] = useState<any>(null);
+  const [deletingPdf, setDeletingPdf] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -172,6 +176,41 @@ export default function PdfLibraryPage() {
     }
   };
 
+  // Handle delete PDF
+  const handleDeleteClick = (e: React.MouseEvent, pdf: any) => {
+    e.stopPropagation(); // Prevent card click
+    setPdfToDelete(pdf);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pdfToDelete) return;
+
+    setDeletingPdf(true);
+    try {
+      const result = await deletePDF(pdfToDelete.id);
+
+      if (result.success) {
+        // Remove from local state
+        setPdfs(pdfs.filter(pdf => pdf.id !== pdfToDelete.id));
+        setDeleteModalOpen(false);
+        setPdfToDelete(null);
+      } else {
+        setError(result.message || 'Failed to delete PDF');
+      }
+    } catch (error) {
+      console.error('Error deleting PDF:', error);
+      setError('Failed to delete PDF');
+    } finally {
+      setDeletingPdf(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false);
+    setPdfToDelete(null);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <RetroGrid />
@@ -190,18 +229,20 @@ export default function PdfLibraryPage() {
             </Avatar>
           </div>
           <span className="relative inline-block overflow-hidden rounded-full p-[1px]">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              disabled={headerLoading}
-              className="relative bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent border border-white/10 hover:from-zinc-300/10 hover:via-purple-400/30 text-white"
-              aria-label="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </span>
+  <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
+  <Button
+  variant="ghost"
+  size="icon"
+  onClick={handleLogout}
+  disabled={headerLoading}
+  aria-label="Logout"
+  className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent border border-white/10 hover:from-zinc-300/10 hover:via-purple-400/30 text-white flex items-center justify-center"
+>
+  <LogOut className="w-4 h-4" />
+</Button>
+
+</span>
+
         </div>
       </header>
 
@@ -254,23 +295,23 @@ export default function PdfLibraryPage() {
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   <Button
-                    onClick={handleUploadSample}
-                    disabled={uploadingSample}
-                    variant="outline"
-                    className="w-full md:w-auto border-purple-500/50 hover:border-purple-500 text-purple-300 hover:text-white hover:bg-purple-600/20"
-                  >
-                    {uploadingSample ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Loading Sample...
-                      </>
-                    ) : (
-                      <>
-                        <FileText className="w-4 h-4 mr-2" />
-                        Try Sample PDF
-                      </>
-                    )}
-                  </Button>
+  onClick={handleUploadSample}
+  disabled={uploadingSample}
+  className="w-full md:w-auto bg-gradient-to-r from-purple-600/80 to-purple-700/80 hover:from-purple-600 hover:to-purple-700 border border-purple-500/30 hover:border-purple-500/50 text-white shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
+>
+  {uploadingSample ? (
+    <>
+      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+      Loading Sample...
+    </>
+  ) : (
+    <>
+      <FileText className="w-4 h-4 mr-2" />
+      Try Sample PDF
+    </>
+  )}
+</Button>
+
                 </motion.div>
               </div>
             </div>
@@ -305,9 +346,20 @@ export default function PdfLibraryPage() {
                     whileHover={{ scale: 1.03, boxShadow: "0 4px 32px 0 rgba(0,0,0,0.15)" }}
                     transition={{ type: "spring", stiffness: 300 }}
                     onClick={() => router.push(`/pdf/${pdf.id}`)}
-                    className="cursor-pointer"
+                    className="cursor-pointer group relative"
                   >
                     <Card className="backdrop-blur-xl bg-black/20 border border-white/10 p-6 flex flex-col h-full transition-all">
+                      {/* Delete button - positioned absolutely */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleDeleteClick(e, pdf)}
+                        className="absolute top-2 right-2 h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200 opacity-0 group-hover:opacity-100 z-10"
+                        title="Delete PDF"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+
                       <div className="flex items-center gap-2 mb-2">
                         <FileText className="w-5 h-5 text-purple-400" />
                         <span className="font-semibold text-white">{pdf.name}</span>
@@ -350,6 +402,71 @@ export default function PdfLibraryPage() {
         onClose={() => setUploadModalOpen(false)}
         onSuccess={handleUploadSuccess}
       />
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {deleteModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={handleCancelDelete}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="bg-black/90 border border-white/10 rounded-lg p-6 w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Delete PDF</h3>
+                  <p className="text-gray-400 text-sm">This action cannot be undone.</p>
+                </div>
+              </div>
+
+              <p className="text-white mb-6">
+                Are you sure you want to delete <span className="font-semibold text-purple-300">"{pdfToDelete?.name}"</span>?
+                This will permanently remove the PDF and all associated data.
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="default"
+                  onClick={handleCancelDelete}
+                  disabled={deletingPdf}
+                  className="flex-1 border-white/20 hover:bg-white/10 text-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmDelete}
+                  disabled={deletingPdf}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  {deletingPdf ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete PDF
+                    </>
+                  )}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

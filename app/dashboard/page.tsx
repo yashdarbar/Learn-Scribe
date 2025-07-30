@@ -107,18 +107,28 @@ export default function Dashboard() {
             </Avatar>
           </div>
           <span className="relative inline-block overflow-hidden rounded-full p-[1px]">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              disabled={loading}
-              className="relative bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent border border-white/10 hover:from-zinc-300/10 hover:via-purple-400/30 text-white p-2 h-8 w-8 sm:h-10 sm:w-10"
-              aria-label="Logout"
-            >
-              <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
-            </Button>
-          </span>
+  <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
+  <Button
+    variant="ghost"
+    size="icon" // <-- change from "sm" to "icon" if supported
+    onClick={handleLogout}
+    disabled={loading}
+    aria-label="Logout"
+    className="
+      relative
+      h-8 w-8 sm:h-10 sm:w-10 rounded-full
+      bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent
+      border border-white/10
+      hover:from-zinc-300/10 hover:via-purple-400/30
+      text-white flex items-center justify-center
+      transition-all
+      p-0
+    "
+  >
+    <LogOut className="w-4 h-4" />  {/* consistent icon size */}
+  </Button>
+</span>
+
         </div>
       </header>
 

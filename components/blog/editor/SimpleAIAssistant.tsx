@@ -105,6 +105,19 @@ export default function SimpleAIAssistant({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isVisible, onClose]);
 
+  // Clear state when component closes
+  useEffect(() => {
+    if (!isVisible) {
+      setSuggestions([]);
+      setSelectedSuggestion(0);
+      setCustomPrompt("");
+      setActiveTab('continue');
+      setShowPreview(false);
+      setIsError(false);
+      setLoading(false);
+    }
+  }, [isVisible]);
+
   const handleGetSuggestions = async (type: 'continue' | 'summarize' | 'improve' | 'custom') => {
     if (!currentContent.trim()) return;
 

@@ -128,14 +128,14 @@ export default function SignIn() {
             </span>
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Sign in to your account to continue</p>
+          <p className="text-gray-400">Log in to your account to continue</p>
         </div>
 
         <div className="backdrop-blur-xl bg-black/30 border border-white/10 rounded-2xl shadow-xl p-8">
           <AuthForm mode="login" onSubmit={handleLogin} />
           {loading && (
             <div className="text-center text-sm text-gray-400 mt-4">
-              Signing you in...
+              Logging you in...
             </div>
           )}
         </div>
