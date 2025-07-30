@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Monitor, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -51,6 +51,41 @@ const RetroGrid = ({
   )
 }
 
+const ScreenSizeNotice = () => {
+  return (
+    <>
+      {/* Notice for mobile devices (visible on sm and below) */}
+      <div className="block md:hidden mb-6 mx-4">
+        <div className="bg-gradient-to-r from-orange-500/10 to-purple-500/10 border border-orange-500/20 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-orange-300 mb-1">
+                Best Experience on Desktop
+              </h3>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                For the optimal experience with all features, we recommend using this application on a desktop or laptop computer.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Notice for tablet devices (visible on md to lg) */}
+      <div className="hidden md:block lg:hidden mb-6 mx-4">
+        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-4">
+          <div className="flex items-center justify-center space-x-3">
+            <Monitor className="w-5 h-5 text-blue-400" />
+            <p className="text-sm text-gray-300 text-center">
+              <span className="text-blue-300 font-medium">Pro tip:</span> Use a larger screen for the best experience with all features
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
 const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
   (
     {
@@ -79,8 +114,14 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
 
           {/* Main content container */}
           <div className="relative z-10 w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {/* Screen Size Notice */}
+            <div className="pt-4 sm:pt-6">
+              <ScreenSizeNotice />
+            </div>
+
             {/* Text content section */}
-            <div className="pt-16 sm:pt-20 md:pt-24 lg:pt-28 pb-8 sm:pb-12 md:pb-16">
+            <div className="pt-12 sm:pt-16 md:pt-20 lg:pt-24 pb-8 sm:pb-12 md:pb-16">
               <div className="text-center max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-8">
                 {/* Title badge */}
                 <div className="flex justify-center">
@@ -103,7 +144,7 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                 </h2>
 
                 {/* Description */}
-                <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-xs sm:max-w-md md:max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
+                <p className="text-sm sm:text-base md:text-lg text-gray-300 max-w-xs sm:max-w-md md:max-2xl mx-auto leading-relaxed px-4 sm:px-0">
                   {description}
                 </p>
 
