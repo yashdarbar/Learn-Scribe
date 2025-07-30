@@ -3,6 +3,7 @@
 import { GalleryVerticalEnd } from "lucide-react"
 import { useState } from "react";
 import { AuthForm } from "@/components/auth-form"
+import DemoLogin from "@/components/auth/DemoLogin"
 import { createClient } from "@/utils/supabase/client"
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -138,6 +139,10 @@ export default function SignIn() {
               Logging you in...
             </div>
           )}
+        </div>
+
+        <div className="mt-4">
+          <DemoLogin />
         </div>
 
         <div className="text-center text-xs text-gray-500 mt-6">
