@@ -217,34 +217,47 @@ export default function PdfLibraryPage() {
       <div className="absolute top-0 z-[0] h-screen w-screen bg-purple-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
 
       {/* Header - Copied from dashboard */}
-      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/10 bg-black/50 backdrop-blur-xl">
-        <div className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-[linear-gradient(180deg,_#FFF_0%,_rgba(255,_255,_255,_0.7)_100%)]">
-          Welcome back, {user?.user_metadata?.first_name || user?.email || "User"}
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative inline-block overflow-hidden rounded-full p-[1px]">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
-            <Avatar className="relative bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent border border-white/10">
-              <span className="text-lg font-semibold text-white">{user?.user_metadata?.full_name?.[0] || user?.email?.[0]}</span>
-            </Avatar>
-          </div>
-          <span className="relative inline-block overflow-hidden rounded-full p-[1px]">
-  <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
-  <Button
-  variant="ghost"
-  size="icon"
-  onClick={handleLogout}
-  disabled={headerLoading}
-  aria-label="Logout"
-  className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent border border-white/10 hover:from-zinc-300/10 hover:via-purple-400/30 text-white flex items-center justify-center"
->
-  <LogOut className="w-4 h-4" />
-</Button>
+      <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-white/10 bg-black/50 backdrop-blur-xl">
+  <div className="text-base sm:text-lg lg:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-[linear-gradient(180deg,_#FFF_0%,_rgba(255,_255,_255,_0.7)_100%)] flex-1 min-w-0 pr-4">
+    <span className="truncate">
+      Welcome back, {user?.user_metadata?.first_name || user?.email || "User"}
+    </span>
+  </div>
 
-</span>
+  <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
+    <div className="relative inline-block overflow-hidden rounded-full p-[1px]">
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
+      <Avatar className="relative bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent border border-white/10 w-8 h-8 sm:w-10 sm:h-10">
+        <span className="text-sm sm:text-lg font-semibold text-white">
+          {user?.user_metadata?.full_name?.[0] || user?.email?.[0]}
+        </span>
+      </Avatar>
+    </div>
 
-        </div>
-      </header>
+    <span className="relative inline-block overflow-hidden rounded-full p-[1px]">
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleLogout}
+        disabled={loading}
+        aria-label="Logout"
+        className="
+          relative
+          h-8 w-8 sm:h-10 sm:w-10 rounded-full
+          bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent
+          border border-white/10
+          hover:from-zinc-300/10 hover:via-purple-400/30
+          text-white flex items-center justify-center
+          transition-all
+          p-0
+        "
+      >
+        <LogOut className="w-4 h-4" />
+      </Button>
+    </span>
+  </div>
+</header>
 
       {/* Main Content */}
       <div className="relative z-10 flex items-center justify-center py-8 px-2">

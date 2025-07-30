@@ -164,30 +164,6 @@ export function PdfUploadModal({ open, onClose, onSuccess }: PdfUploadModalProps
       <DialogContent className="max-w-md bg-black/70 border border-white/10 backdrop-blur-xl rounded-2xl shadow-xl">
         <DialogTitle className="text-white text-xl mb-4">Upload PDF</DialogTitle>
         <AnimatePresence mode="wait">
-          {/* {(state === "default" || state === "drag") && (
-            <motion.div
-              {...getRootProps()}
-              className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-8 cursor-pointer transition-all ${
-                isDragActive
-                  ? "border-blue-500 bg-blue-500/10 shadow-lg"
-                  : "border-white/20 bg-black/30 hover:border-purple-400/50 hover:bg-purple-500/5"
-              }`}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              whileHover={{ scale: 1.02 }}
-              key="dropzone"
-            >
-              <input {...getInputProps()} />
-              <CloudUpload className="w-12 h-12 text-blue-400 mb-2 animate-bounce" />
-              <div className="text-lg text-white font-semibold mb-1">
-                Drop your PDF here or click to browse
-              </div>
-              <div className="text-sm text-gray-400">
-                Supports PDF files up to 50MB
-              </div>
-            </motion.div>
-          )} */}
           {(state === "default" || state === "drag") && (
   <motion.div
     className="p-0" // Container for animation

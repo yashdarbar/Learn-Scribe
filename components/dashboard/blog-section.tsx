@@ -61,29 +61,33 @@ export function BlogSection() {
           </Link>
         </Button> */}
 
-        {/* ✅ RESPONSIVE Secondary CTAs */}
-        <div className="flex flex-col sm:flex-row gap-2 mb-4">
-          <Button asChild variant="default" size="sm" className="flex-1 h-9 sm:h-10 lg:h-11 text-xs sm:text-sm">
+        {/* ✅ RESPONSIVE Secondary CTAs - Stack on mobile, side by side on larger screens */}
+        <div className="flex flex-col gap-2 sm:flex-row mb-4">
+          <Button
+            asChild
+            size="sm"
+            className="w-full sm:flex-1 h-9 sm:h-10 lg:h-11 text-xs sm:text-sm"
+          >
             <Link href="/editor" className="flex items-center justify-center">
               <span className="hidden sm:inline">Start Writing Your First Blog</span>
               <span className="sm:hidden">Start Writing</span>
-              <ExternalLink className="w-3 h-3 ml-1 sm:ml-2 flex-shrink-0" />
+              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
             </Link>
           </Button>
-          <Button asChild variant="default" size="sm" className="flex-1 h-9 sm:h-10 lg:h-11 text-xs sm:text-sm">
+          <Button
+            asChild
+            size="sm"
+            variant="default"
+            className="w-full sm:flex-1 h-9 sm:h-10 lg:h-11 text-xs sm:text-sm"
+          >
             <Link href="/blogs" className="flex items-center justify-center">
               <span className="hidden sm:inline">Explore All Blogs</span>
               <span className="sm:hidden">Explore Blogs</span>
-              <ExternalLink className="w-3 h-3 ml-1 sm:ml-2 flex-shrink-0" />
+              <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 flex-shrink-0" />
             </Link>
           </Button>
-          {/* <Button asChild variant="default" size="sm" className="flex-1">
-            <Link href="/blogs/my-blogs">
-              My Blogs
-              <ExternalLink className="w-3 h-3 ml-2" />
-            </Link>
-          </Button> */}
         </div>
+
       </div>
     </motion.section>
   )

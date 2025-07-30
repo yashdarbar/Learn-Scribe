@@ -61,14 +61,6 @@ export function PdfSection() {
             <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
           </Link>
         </Button>
-
-        {/* Secondary CTA - commented out as in original */}
-        {/* <Button asChild variant="ghost" size="sm">
-          <Link href="/pdf-demo">
-            See How It Works
-            <Play className="w-3 h-3 ml-2" />
-          </Link>
-        </Button> */}
       </div>
     </motion.section>
   )
