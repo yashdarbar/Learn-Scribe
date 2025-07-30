@@ -231,46 +231,70 @@ export default function BlogsPage() {
             </div>
 
             {/* Heading and action buttons */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">Explore & Create Blogs</h1>
-                <p className="text-gray-400">Discover amazing content from our community</p>
-              </div>
-              <div className="flex gap-2 w-full md:w-auto">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    placeholder="Search blogs..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400 hidden sm:block" />
-                </div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
-                  <Button asChild variant="outline" className="ml-2 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all hover:text-white duration-300">
-                    <Link href="/blogs/my-blogs">
-                      <User className="w-4 h-4 mr-2" /> My Blogs
-                    </Link>
-                  </Button>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
-                  <Button asChild className="ml-2 bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
-                    <Link href="/editor">
-                      <Plus className="w-4 h-4" /> Write New Blog
-                    </Link>
-                  </Button>
-                </motion.div>
-              </div>
-            </div>
+            <div className="flex flex-col gap-6 mb-8">
+  {/* Header Section */}
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 className="text-3xl font-bold text-white mb-2">Explore & Create Blogs</h1>
+      <p className="text-gray-400">Discover amazing content from our community</p>
+    </div>
+  </div>
+
+  {/* Search and Actions Section */}
+  <div className="flex flex-col sm:flex-row gap-3">
+    {/* Search Input */}
+    <div className="relative flex-1 min-w-0">
+      <input
+        type="text"
+        placeholder="Search blogs..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-2 pr-10 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+    </div>
+
+    {/* Action Buttons */}
+    <div className="flex gap-2 sm:gap-3 flex-shrink-0">
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        className="flex-1 sm:flex-none"
+      >
+        <Button
+          asChild
+          variant="outline"
+          className="w-full sm:w-auto border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all hover:text-white duration-300 px-3 sm:px-4"
+        >
+          <Link href="/blogs/my-blogs">
+            <User className="w-4 h-4 sm:mr-2" />
+            <span className="hidden xs:inline sm:inline">My Blogs</span>
+            <span className="xs:hidden sm:hidden">My</span>
+          </Link>
+        </Button>
+      </motion.div>
+
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        className="flex-1 sm:flex-none"
+      >
+        <Button
+          asChild
+          className="w-full sm:w-auto bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 px-3 sm:px-4"
+        >
+          <Link href="/editor">
+            <Plus className="w-4 h-4 sm:mr-2" />
+            <span className="hidden xs:inline sm:inline">Write New Blog</span>
+            <span className="xs:hidden sm:hidden">Write</span>
+          </Link>
+        </Button>
+      </motion.div>
+    </div>
+  </div>
+</div>
 
             {/* Loading state */}
             {loading && (

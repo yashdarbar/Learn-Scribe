@@ -272,29 +272,36 @@ export default function MyBlogsPage() {
                   <p className="text-gray-400">Manage your published and draft blogs</p>
                 </div>
               </div>
-              <div className="flex gap-2 w-full md:w-auto">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    placeholder="Search your blogs..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
-                </div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
-                  <Button asChild className="ml-2 bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300">
-                    <Link href="/editor">
-                      <Plus className="w-4 h-4 mr-2" /> Write New Blog
-                    </Link>
-                  </Button>
-                </motion.div>
-              </div>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+  <div className="relative flex-1 min-w-0">
+    <input
+      type="text"
+      placeholder="Search your blogs..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-2 pr-10 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+    <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+  </div>
+
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+    className="flex-shrink-0"
+  >
+    <Button
+      asChild
+      className="w-full sm:w-auto bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
+    >
+      <Link href="/editor">
+        <Plus className="w-4 h-4 sm:mr-2" />
+        <span className="hidden sm:inline">Write New Blog</span>
+        <span className="sm:hidden">Write</span>
+      </Link>
+    </Button>
+  </motion.div>
+</div>
             </div>
 
             {/* Loading state */}
