@@ -53,7 +53,7 @@ export default function SignUpPage() {
         data: {
           first_name: name,
         },
-        // emailRedirectTo: `${window.location.origin}/auth/callback`
+        emailRedirectTo: `${window.location.origin}/login`
       }
     })
 
