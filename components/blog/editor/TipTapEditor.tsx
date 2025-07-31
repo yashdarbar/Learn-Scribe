@@ -10,8 +10,6 @@ import { Image } from '@tiptap/extension-image'
 import { TextAlign } from '@tiptap/extension-text-align'
 import { Typography } from '@tiptap/extension-typography'
 import { HorizontalRule } from '@tiptap/extension-horizontal-rule'
-import { BubbleMenu } from '@tiptap/extension-bubble-menu'
-import { FloatingMenu } from '@tiptap/extension-floating-menu'
 import { ReactRenderer } from '@tiptap/react'
 import {
   Bold,
@@ -58,9 +56,7 @@ function TipTapEditorClient({ content, onChange, placeholder }: TipTapEditorProp
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        history: false,
-      }),
+      StarterKit,
       Placeholder.configure({
         placeholder: placeholder || 'Type "/" for commands...',
       }),
@@ -145,8 +141,6 @@ function TipTapEditorClient({ content, onChange, placeholder }: TipTapEditorProp
         editor={editor}
         className="prose prose-invert max-w-none focus:outline-none"
       />
-      <BubbleMenuComponent editor={editor} />
-      <FloatingMenuComponent editor={editor} />
     </div>
   )
 }
@@ -280,125 +274,6 @@ const MenuBar = ({ editor }: { editor: any }) => {
         <AlignRight className="w-4 h-4" />
       </Button>
     </div>
-  )
-}
-
-const BubbleMenuComponent = ({ editor }: { editor: any }) => {
-  if (!editor) {
-    return null
-  }
-
-  return (
-    <BubbleMenu
-      editor={editor}
-      tippyOptions={{ duration: 100 }}
-      className="flex gap-1 p-1 bg-black/95 border border-white/10 rounded-lg shadow-lg"
-    >
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'bg-purple-600/50' : ''}
-      >
-        <Bold className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive('italic') ? 'bg-purple-600/50' : ''}
-      >
-        <Italic className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={editor.isActive('strike') ? 'bg-purple-600/50' : ''}
-      >
-        <Strikethrough className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        className={editor.isActive('code') ? 'bg-purple-600/50' : ''}
-      >
-        <Code className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleLink().run()}
-        className={editor.isActive('link') ? 'bg-purple-600/50' : ''}
-      >
-        <LinkIcon className="w-4 h-4" />
-      </Button>
-    </BubbleMenu>
-  )
-}
-
-const FloatingMenuComponent = ({ editor }: { editor: any }) => {
-  if (!editor) {
-    return null
-  }
-
-  return (
-    <FloatingMenu
-      editor={editor}
-      tippyOptions={{ duration: 100 }}
-      className="flex gap-1 p-1 bg-black/95 border border-white/10 rounded-lg shadow-lg"
-    >
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-      >
-        <Heading1 className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-      >
-        <Heading2 className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-      >
-        <Heading3 className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-      >
-        <List className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-      >
-        <ListOrdered className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-      >
-        <Quote className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-      >
-        <CodeIcon className="w-4 h-4" />
-      </Button>
-    </FloatingMenu>
   )
 }
 
