@@ -17,13 +17,15 @@ import {
   Lock,
   ArrowLeft,
   Menu,
-  ChevronRight
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createBlog, updateBlog, publishBlog, getAllCategories, getBlogById } from "@/lib/actions/blog-actions";
 import { BlogCategory, CreateBlogData, UpdateBlogData } from "@/types/blog";
 import TipTapEditor from "./editor/TipTapEditorSSR";
+import SimpleAIAssistant from "./editor/SimpleAIAssistant";
 import { BlogContent } from "@/types/blog";
 
 interface BlogEditorProps {
@@ -53,6 +55,10 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
 
   // ✅ UPDATED: Responsive state
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // AI Assistant state
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [aiAssistantPosition, setAIAssistantPosition] = useState({ x: 0, y: 0 });
 
   // Data state
   const [categories, setCategories] = useState<BlogCategory[]>([]);
@@ -819,7 +825,23 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
           {/* <EditorToolbar onAddBlock={addBlock} /> */}
 
           {/* ✅ UPDATED: Content area */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 relative">
+            {/* AI Assistant Button */}
+            {!showPreview && (
+              <div className="absolute top-4 right-4 z-10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAIAssistant(true)}
+                  className="bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 hover:text-purple-200 border border-purple-500/30"
+                  title="AI Writing Assistant"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  AI Assistant
+                </Button>
+              </div>
+            )}
+
             {showPreview ? (
               <BlogPreview
                 title={title}
@@ -833,6 +855,42 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                 onChange={setContent}
                 placeholder="Type '/' for commands..."
               />
+            )}
+
+            {/* AI Assistant */}
+            {showAIAssistant && (
+              <div
+                className="fixed z-50"
+                style={{
+                  right: '1rem',
+                  top: '5rem',
+                  maxWidth: 'calc(100vw - 2rem)',
+                  minWidth: '320px'
+                }}
+              >
+                <SimpleAIAssistant
+                  currentContent={content}
+                  cursorPosition={0}
+                  onAccept={(aiContent, mode) => {
+                    switch (mode) {
+                      case 'append':
+                        setContent(prev => prev + ' ' + aiContent);
+                        break;
+                      case 'replace':
+                        setContent(aiContent);
+                        break;
+                      case 'insert':
+                        setContent(prev => prev + ' ' + aiContent);
+                        break;
+                    }
+                    setShowAIAssistant(false);
+                  }}
+                  onClose={() => setShowAIAssistant(false)}
+                  isVisible={showAIAssistant}
+                  blockType="paragraph"
+                  allBlocks={[content]}
+                />
+              </div>
             )}
           </div>
         </div>

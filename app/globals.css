@@ -116,6 +116,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom breakpoint for very small screens */
+@layer utilities {
+  .xs\:w-\[320px\] {
+    width: 320px;
+  }
+  .xs\:inline {
+    display: inline;
+  }
+}
+
 /* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
@@ -406,4 +416,9 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Textarea scrollbar fix */
+textarea::-webkit-scrollbar-track {
+  background: transparent;
 }

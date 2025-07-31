@@ -12,6 +12,7 @@ import { TextAlign } from '@tiptap/extension-text-align'
 import { Typography } from '@tiptap/extension-typography'
 import { HorizontalRule } from '@tiptap/extension-horizontal-rule'
 import { ReactRenderer } from '@tiptap/react'
+import SimpleAIAssistant from './SimpleAIAssistant'
 import {
   Bold,
   Italic,
@@ -29,7 +30,8 @@ import {
   Heading3,
   Code as CodeIcon,
   Image as ImageIcon,
-  SeparatorHorizontal
+  SeparatorHorizontal,
+  Sparkles
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -39,7 +41,7 @@ interface TipTapEditorProps {
   placeholder?: string
 }
 
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({ editor, onAIAssistantClick }: { editor: any; onAIAssistantClick: () => void }) => {
   if (!editor) {
     return null
   }
@@ -195,12 +197,26 @@ const MenuBar = ({ editor }: { editor: any }) => {
       >
         <AlignRight className="w-4 h-4" />
       </Button>
+
+      <div className="w-px bg-white/20 mx-2" />
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onAIAssistantClick}
+        className="text-purple-400 hover:text-purple-300 hover:bg-purple-600/30"
+        title="AI Writing Assistant"
+      >
+        <Sparkles className="w-4 h-4" />
+      </Button>
     </div>
   )
 }
 
 function TipTapEditorContent({ content, onChange, placeholder }: TipTapEditorProps) {
   const [isMounted, setIsMounted] = useState(false)
+  const [showAIAssistant, setShowAIAssistant] = useState(false)
+  const [aiAssistantPosition, setAIAssistantPosition] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
     setIsMounted(true)
@@ -304,11 +320,75 @@ function TipTapEditorContent({ content, onChange, placeholder }: TipTapEditorPro
 
   return (
     <div className="relative">
-      <MenuBar editor={editor} />
+      <MenuBar editor={editor} onAIAssistantClick={() => {
+          const { from } = editor.state.selection
+          const coords = editor.view.coordsAtPos(from)
+          setAIAssistantPosition({ x: coords.left, y: coords.bottom })
+          setShowAIAssistant(true)
+        }} />
       <EditorContent
         editor={editor}
         className="prose prose-invert max-w-none focus:outline-none min-h-[400px] p-4"
       />
+
+      {/* AI Assistant */}
+      {showAIAssistant && (
+        <div
+          className="fixed z-50"
+          style={{
+            left: (() => {
+              const popupWidth = window.innerWidth < 475 ? 280 : window.innerWidth < 640 ? 320 : window.innerWidth < 768 ? 400 : 450;
+              const rightSpace = window.innerWidth - aiAssistantPosition.x;
+              const leftSpace = aiAssistantPosition.x;
+              
+              // If there's not enough space on the right, position on the left
+              if (rightSpace < popupWidth + 20) {
+                return Math.max(10, leftSpace - popupWidth - 10);
+              }
+              // Otherwise position on the right
+              return Math.max(10, aiAssistantPosition.x + 10);
+            })(),
+            top: (() => {
+              const popupHeight = 350; // Estimated height
+              const bottomSpace = window.innerHeight - aiAssistantPosition.y;
+              
+              // If there's not enough space below, position above
+              if (bottomSpace < popupHeight + 20) {
+                return Math.max(10, aiAssistantPosition.y - popupHeight - 10);
+              }
+              // Otherwise position below
+              return Math.max(10, aiAssistantPosition.y + 10);
+            })(),
+            maxWidth: 'calc(100vw - 20px)',
+            minWidth: '280px'
+          }}
+        >
+          <SimpleAIAssistant
+            currentContent={editor.getHTML()}
+            cursorPosition={editor.state.selection.from}
+            onAccept={(content, mode) => {
+              const { from, to } = editor.state.selection
+
+              switch (mode) {
+                case 'append':
+                  editor.chain().focus().insertContent(content).run()
+                  break
+                case 'replace':
+                  editor.chain().focus().deleteRange({ from, to }).insertContent(content).run()
+                  break
+                case 'insert':
+                  editor.chain().focus().insertContent(content).run()
+                  break
+              }
+              setShowAIAssistant(false)
+            }}
+            onClose={() => setShowAIAssistant(false)}
+            isVisible={showAIAssistant}
+            blockType="paragraph"
+            allBlocks={[editor.getHTML()]}
+          />
+        </div>
+      )}
     </div>
   )
 }
