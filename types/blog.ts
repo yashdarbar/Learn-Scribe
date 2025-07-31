@@ -2,7 +2,7 @@ export interface Blog {
   id: string;
   title: string;
   slug: string;
-  content: any; // JSONB content
+  content: string; // HTML content from TipTap editor
   excerpt?: string;
   cover_image_url?: string;
   author_id: string;
@@ -38,7 +38,7 @@ export interface BlogCategory {
 
 export interface CreateBlogData {
   title: string;
-  content: any;
+  content: string; // HTML content from TipTap editor
   excerpt?: string;
   cover_image_url?: string;
   category_id?: string;
@@ -63,7 +63,7 @@ export interface ActionResult<T = any> {
   error?: string;
 }
 
-// Editor specific types
+// Legacy types for backward compatibility (can be removed later)
 export interface EditorBlock {
   id: string;
   type: 'paragraph' | 'heading' | 'image' | 'list' | 'quote' | 'code';

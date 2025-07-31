@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import BlogEditor from "@/components/blog/BlogEditor";
+import TipTapBlogEditor from "@/components/blog/TipTapBlogEditor";
 import { createClient } from "@/utils/supabase/client";
 
 function EditorContent() {
@@ -59,7 +59,7 @@ function EditorContent() {
   }
 
   return (
-    <BlogEditor
+    <TipTapBlogEditor
       blogId={blogId || undefined}
       onSave={handleSave}
       onPublish={handlePublish}

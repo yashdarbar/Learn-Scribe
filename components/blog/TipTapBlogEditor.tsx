@@ -24,16 +24,15 @@ import { Card } from "@/components/ui/card";
 import { createBlog, updateBlog, publishBlog, getAllCategories, getBlogById } from "@/lib/actions/blog-actions";
 import { BlogCategory, CreateBlogData, UpdateBlogData } from "@/types/blog";
 import TipTapEditor from "./editor/TipTapEditorSSR";
-import { BlogContent } from "@/types/blog";
 
-interface BlogEditorProps {
+interface TipTapBlogEditorProps {
   blogId?: string; // For editing existing blogs
   onSave?: (blog: any) => void;
   onPublish?: (blog: any) => void;
   onClose?: () => void;
 }
 
-export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogEditorProps) {
+export default function TipTapBlogEditor({ blogId, onSave, onPublish, onClose }: TipTapBlogEditorProps) {
   // Editor state
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -107,7 +106,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
 
         if (result.success && result.data) {
           const blog = result.data;
-          console.log('🔍 Loading blog:', blog);
+          console.log('🔍 TipTapBlogEditor loading blog:', blog);
           console.log('📄 Blog content type:', typeof blog.content);
           console.log('📄 Blog content:', blog.content);
           console.log('📄 Blog content stringified:', JSON.stringify(blog.content, null, 2));
@@ -119,21 +118,21 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
           let contentToSet = blog.content;
           if (typeof blog.content === 'object' && blog.content && 'blocks' in blog.content) {
             // Old block-based format - convert to HTML
-            console.log('🔄 Converting old block format to HTML');
+            console.log('🔄 TipTapBlogEditor converting old block format to HTML');
             contentToSet = convertBlocksToHTML((blog.content as any).blocks);
-            console.log('✅ Converted content:', contentToSet);
+            console.log('✅ TipTapBlogEditor converted content:', contentToSet);
           } else if (typeof blog.content === 'string' && blog.content.trim() === '') {
             // Empty content
-            console.log('📝 Empty content detected');
+            console.log('📝 TipTapBlogEditor empty content detected');
             contentToSet = '';
           } else if (typeof blog.content === 'string') {
-            console.log('📝 Using content as-is (string format)');
+            console.log('📝 TipTapBlogEditor using content as-is (string format)');
           } else {
-            console.log('❓ Unknown content format:', typeof blog.content);
+            console.log('❓ TipTapBlogEditor unknown content format:', typeof blog.content);
             contentToSet = '';
           }
 
-          console.log('🎯 Final content to set:', contentToSet);
+          console.log('🎯 TipTapBlogEditor final content to set:', contentToSet);
           setContent(contentToSet);
           setCategoryId(blog.category?.id || "");
           setCoverImageUrl(blog.cover_image_url || "");
@@ -181,20 +180,15 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
 
   // Calculate word count and read time
   useEffect(() => {
-    let totalWords = 0;
-    // The content state is now a string, not a BlogContent object.
-    // This useEffect needs to be updated to parse the string into blocks.
-    // For now, we'll keep it as is, but it will not reflect the actual block count.
-    // A proper implementation would involve a TipTap extension that provides block counts.
-    // For now, we'll just set wordCount to 0 as the content is a string.
-    // This will be fixed once TipTap is fully integrated.
-    setWordCount(0);
-    setReadTime(Math.max(1, Math.ceil(0 / 200))); // 200 words per minute
-  }, [content]);
+    // Simple word count calculation from HTML content
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    const text = tempDiv.textContent || tempDiv.innerText || '';
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    const count = words.length;
 
-  // Debug useEffect to track content changes
-  useEffect(() => {
-    // Removed debug logging to improve performance
+    setWordCount(count);
+    setReadTime(Math.max(1, Math.ceil(count / 200))); // 200 words per minute
   }, [content]);
 
   // Auto-save functionality
@@ -207,7 +201,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
     try {
       const blogData: CreateBlogData = {
         title: title.trim(),
-        content: content, // Save the string content
+        content,
         excerpt: excerpt.trim(),
         cover_image_url: coverImageUrl,
         category_id: categoryId || undefined,
@@ -229,22 +223,27 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
     } finally {
       setIsSaving(false);
     }
-  }, [title, content, excerpt, coverImageUrl, categoryId, blogId]);
+  }, [title, excerpt, coverImageUrl, categoryId, blogId]); // Removed content from dependencies
 
-  // Auto-save on content change
+  // Auto-save on content change - separate effect to avoid dependency cycles
   useEffect(() => {
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
 
-    autoSaveTimeoutRef.current = setTimeout(autoSave, 3000); // Auto-save after 3 seconds
+    // Only auto-save if we have a title and content, and increase delay
+    if (title.trim() && content.trim()) {
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        autoSave();
+      }, 5000); // Increased from 3 seconds to 5 seconds for better UX
+    }
 
     return () => {
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [autoSave]);
+  }, [content, title, autoSave]);
 
   // Manual save
   const handleSave = async () => {
@@ -259,7 +258,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
     try {
       const blogData: CreateBlogData = {
         title: title.trim(),
-        content: content, // Save the string content
+        content,
         excerpt: excerpt.trim(),
         cover_image_url: coverImageUrl,
         category_id: categoryId || undefined,
@@ -297,7 +296,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
     try {
       const blogData: CreateBlogData = {
         title: title.trim(),
-        content: content, // Save the string content
+        content,
         excerpt: excerpt.trim(),
         cover_image_url: coverImageUrl,
         category_id: categoryId || undefined,
@@ -328,230 +327,200 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
     }
   };
 
-  // Add new block
-  const addBlock = (type: string, afterId?: string) => {
-    // This function is no longer needed as TipTap handles block creation
-    // Keeping it for now, but it will be removed once TipTap is fully integrated
-    console.log('addBlock called with type:', type, 'afterId:', afterId);
-  };
-
-  // Update block
-  const updateBlock = (id: string, updates: any) => {
-    // This function is no longer needed as TipTap handles block updates
-    // Keeping it for now, but it will be removed once TipTap is fully integrated
-    console.log('updateBlock called with ID:', id, 'updates:', updates);
-  };
-
-  // Delete block
-  const deleteBlock = (id: string) => {
-    // This function is no longer needed as TipTap handles block deletion
-    // Keeping it for now, but it will be removed once TipTap is fully integrated
-    console.log('deleteBlock called with ID:', id);
-  };
-
-  // Move block
-  const moveBlock = (id: string, direction: 'up' | 'down') => {
-    // This function is no longer needed as TipTap handles block reordering
-    // Keeping it for now, but it will be removed once TipTap is fully integrated
-    console.log('moveBlock called with ID:', id, 'direction:', direction);
-  };
-
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex flex-col">
       {/* ✅ UPDATED: Responsive Header with proper mobile layout */}
-      {/* // Replace your existing header section with this responsive version */}
+      <header className="border-b border-white/10 bg-black/50">
+        {/* Mobile Header (Below 750px) */}
+        <div className="flex max-[750px]:flex min-[750px]:hidden items-center justify-between p-3">
+          {/* Left side - Back button, icon, title */}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <Button
+              size="sm"
+              variant="default"
+              onClick={handleBack}
+              className="p-2 h-9 w-9 flex-shrink-0"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <FileText className="w-4 h-4 text-purple-400 flex-shrink-0" />
+            <span className="text-sm font-semibold text-white truncate">
+              {blogId ? 'Edit Blog' : 'Write New Blog'}
+            </span>
+          </div>
 
-<header className="border-b border-white/10 bg-black/50">
-  {/* Mobile Header (Below 750px) */}
-  <div className="flex max-[750px]:flex min-[750px]:hidden items-center justify-between p-3">
-    {/* Left side - Back button, icon, title */}
-    <div className="flex items-center gap-2 flex-1 min-w-0">
-      <Button
-        size="sm"
-        variant="default"
-        onClick={handleBack}
-        className="p-2 h-9 w-9 flex-shrink-0"
-      >
-        <ArrowLeft className="w-4 h-4" />
-      </Button>
-      <FileText className="w-4 h-4 text-purple-400 flex-shrink-0" />
-      <span className="text-sm font-semibold text-white truncate">
-        {blogId ? 'Edit Blog' : 'Write New Blog'}
-      </span>
-    </div>
+          {/* Right side - Settings and action buttons */}
+          <div className="flex items-center gap-1">
+            {/* Settings button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={toggleSidebar}
+              className="p-2 h-9 w-9"
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
 
-    {/* Right side - Settings and action buttons */}
-    <div className="flex items-center gap-1">
-      {/* Settings button */}
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={toggleSidebar}
-        className="p-2 h-9 w-9"
-      >
-        <Settings className="w-4 h-4" />
-      </Button>
+            {/* Status indicator */}
+            <div className="px-1">
+              {status === 'draft' ? (
+                <Lock className="w-4 h-4 text-gray-400" />
+              ) : (
+                <Globe className="w-4 h-4 text-green-400" />
+              )}
+            </div>
 
-      {/* Status indicator */}
-      <div className="px-1">
-        {status === 'draft' ? (
-          <Lock className="w-4 h-4 text-gray-400" />
-        ) : (
-          <Globe className="w-4 h-4 text-green-400" />
-        )}
-      </div>
+            {/* Preview button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowPreview(!showPreview)}
+              className="p-2 h-9 w-9"
+            >
+              {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </Button>
 
-      {/* Preview button */}
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => setShowPreview(!showPreview)}
-        className="p-2 h-9 w-9"
-      >
-        {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-      </Button>
+            {/* Save button */}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="p-2 h-9 w-9"
+            >
+              {isSaving ? (
+                <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+            </Button>
 
-      {/* Save button */}
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={handleSave}
-        disabled={isSaving}
-        className="p-2 h-9 w-9"
-      >
-        {isSaving ? (
-          <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <Save className="w-4 h-4" />
-        )}
-      </Button>
+            {/* Publish button */}
+            <Button
+              size="sm"
+              onClick={handlePublish}
+              disabled={isPublishing || !title.trim()}
+              className="p-2 h-9 w-9"
+            >
+              {isPublishing ? (
+                <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Globe className="w-4 h-4" />
+              )}
+            </Button>
 
-      {/* Publish button */}
-      <Button
-        size="sm"
-        onClick={handlePublish}
-        disabled={isPublishing || !title.trim()}
-        className="p-2 h-9 w-9"
-      >
-        {isPublishing ? (
-          <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <Globe className="w-4 h-4" />
-        )}
-      </Button>
-
-      {/* Close button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onClose}
-        className="p-2 h-9 w-9"
-      >
-        <X className="w-4 h-4" />
-      </Button>
-    </div>
-  </div>
-
-  {/* Desktop Header (Above 750px) - Keep your existing desktop header */}
-  <div className="hidden min-[750px]:flex items-center justify-between p-4">
-    <div className="flex items-center gap-4">
-      <Button
-        size="sm"
-        variant="default"
-        onClick={handleBack}
-        className="p-2"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </Button>
-      <div className="flex items-center gap-2">
-        <FileText className="w-5 h-5 text-purple-400" />
-        <span className="text-lg font-semibold text-white">
-          {blogId ? 'Edit Blog' : 'Write New Blog'}
-        </span>
-      </div>
-    </div>
-
-    <div className="flex items-center gap-3">
-      {/* Status indicator */}
-      <div className="flex items-center gap-2 text-sm">
-        {status === 'draft' ? (
-          <Lock className="w-4 h-4 text-gray-400" />
-        ) : (
-          <Globe className="w-4 h-4 text-green-400" />
-        )}
-        <span className={status === 'draft' ? 'text-gray-400' : 'text-green-400'}>
-          {status === 'draft' ? 'Draft' : 'Published'}
-        </span>
-      </div>
-
-      {/* Word count and read time */}
-      <div className="flex items-center gap-4 text-sm text-gray-400">
-        <span>{wordCount} words</span>
-        <span>•</span>
-        <span>{readTime} min read</span>
-      </div>
-
-      {/* Save status */}
-      {lastSaved && (
-        <div className="flex items-center gap-1 text-xs text-gray-500">
-          <CheckCircle className="w-3 h-3" />
-          <span>Saved {lastSaved.toLocaleTimeString()}</span>
+            {/* Close button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="p-2 h-9 w-9"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
-      )}
 
-      {/* Action buttons */}
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowPreview(!showPreview)}
-          className="flex items-center gap-2"
-        >
-          {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          Preview
-        </Button>
+        {/* Desktop Header (Above 750px) */}
+        <div className="hidden min-[750px]:flex items-center justify-between p-4">
+          <div className="flex items-center gap-4">
+            <Button
+              size="sm"
+              variant="default"
+              onClick={handleBack}
+              className="p-2"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-400" />
+              <span className="text-lg font-semibold text-white">
+                {blogId ? 'Edit Blog' : 'Write New Blog'}
+              </span>
+            </div>
+          </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleSave}
-          disabled={isSaving}
-          className="flex items-center gap-2"
-        >
-          {isSaving ? (
-            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          Save
-        </Button>
+          <div className="flex items-center gap-3">
+            {/* Status indicator */}
+            <div className="flex items-center gap-2 text-sm">
+              {status === 'draft' ? (
+                <Lock className="w-4 h-4 text-gray-400" />
+              ) : (
+                <Globe className="w-4 h-4 text-green-400" />
+              )}
+              <span className={status === 'draft' ? 'text-gray-400' : 'text-green-400'}>
+                {status === 'draft' ? 'Draft' : 'Published'}
+              </span>
+            </div>
 
-        <Button
-          size="sm"
-          onClick={handlePublish}
-          disabled={isPublishing || !title.trim()}
-          className="flex items-center gap-2"
-        >
-          {isPublishing ? (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <Globe className="w-4 h-4" />
-          )}
-          {blogId ? 'Update Blog' : 'Publish'}
-        </Button>
+            {/* Word count and read time */}
+            <div className="flex items-center gap-4 text-sm text-gray-400">
+              <span>{wordCount} words</span>
+              <span>•</span>
+              <span>{readTime} min read</span>
+            </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="p-2"
-        >
-          <X className="w-5 h-5" />
-        </Button>
-      </div>
-    </div>
-  </div>
-</header>
+            {/* Save status */}
+            {lastSaved && (
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <CheckCircle className="w-3 h-3" />
+                <span>Saved {lastSaved.toLocaleTimeString()}</span>
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPreview(!showPreview)}
+                className="flex items-center gap-2"
+              >
+                {showPreview ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                Preview
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex items-center gap-2"
+              >
+                {isSaving ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                Save
+              </Button>
+
+              <Button
+                size="sm"
+                onClick={handlePublish}
+                disabled={isPublishing || !title.trim()}
+                className="flex items-center gap-2"
+              >
+                {isPublishing ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Globe className="w-4 h-4" />
+                )}
+                {blogId ? 'Update Blog' : 'Publish'}
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="p-2"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* ✅ UPDATED: Error/Success messages - responsive */}
       <AnimatePresence>
@@ -672,32 +641,6 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                     </select>
                   </div>
 
-                  {/* Cover Image */}
-                  {/* <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
-                      Cover Image URL
-                    </label>
-                    <input
-                      type="url"
-                      value={coverImageUrl}
-                      onChange={(e) => setCoverImageUrl(e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm"
-                    />
-                    {coverImageUrl && (
-                      <div className="mt-2">
-                        <img
-                          src={coverImageUrl}
-                          alt="Cover preview"
-                          className="w-full h-24 sm:h-32 object-cover rounded-lg border border-white/10"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div> */}
-
                   {/* Statistics */}
                   <div className="space-y-1 sm:space-y-2">
                     <div className="flex items-center justify-between text-xs sm:text-sm">
@@ -707,10 +650,6 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                     <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span className="text-gray-400">Read Time</span>
                       <span className="text-white">{readTime} min</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <span className="text-gray-400">Blocks</span>
-                      <span className="text-white">{0}</span> {/* This will be updated once TipTap is integrated */}
                     </div>
                   </div>
                 </div>
@@ -769,32 +708,6 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
               </select>
             </div>
 
-            {/* Cover Image */}
-            {/* <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2">
-                Cover Image URL
-              </label>
-              <input
-                type="url"
-                value={coverImageUrl}
-                onChange={(e) => setCoverImageUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                className="w-full px-2 sm:px-3 py-1.5 sm:py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm"
-              />
-              {coverImageUrl && (
-                <div className="mt-2">
-                  <img
-                    src={coverImageUrl}
-                    alt="Cover preview"
-                    className="w-full h-24 sm:h-32 object-cover rounded-lg border border-white/10"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-            </div> */}
-
             {/* Statistics */}
             <div className="space-y-1 sm:space-y-2">
               <div className="flex items-center justify-between text-xs sm:text-sm">
@@ -805,19 +718,12 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
                 <span className="text-gray-400">Read Time</span>
                 <span className="text-white">{readTime} min</span>
               </div>
-              <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="text-gray-400">Blocks</span>
-                <span className="text-white">{0}</span> {/* This will be updated once TipTap is integrated */}
-              </div>
             </div>
           </div>
         </div>
 
         {/* ✅ UPDATED: Editor content - mobile-first */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* ✅ UPDATED: Toolbar */}
-          {/* <EditorToolbar onAddBlock={addBlock} /> */}
-
           {/* ✅ UPDATED: Content area */}
           <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
             {showPreview ? (
@@ -844,7 +750,7 @@ export default function BlogEditor({ blogId, onSave, onPublish, onClose }: BlogE
 // Blog Preview Component
 interface BlogPreviewProps {
   title: string;
-  content: string; // Changed from BlogContent to string
+  content: string;
   coverImageUrl?: string;
   excerpt?: string;
 }
@@ -881,67 +787,12 @@ function BlogPreview({ title, content, coverImageUrl, excerpt }: BlogPreviewProp
           <p className="text-gray-400 text-base sm:text-lg mb-4 sm:mb-6 italic">{excerpt}</p>
         )}
 
-        {/* ✅ UPDATED: Responsive content - Render HTML with white text */}
+        {/* ✅ UPDATED: Responsive content */}
         <div
-          className="text-white leading-relaxed text-sm sm:text-base prose prose-invert max-w-none"
+          className="space-y-3 sm:space-y-4"
           dangerouslySetInnerHTML={{ __html: content }}
         />
       </article>
-
-      <style jsx>{`
-        .prose h1 {
-          font-size: 2.25rem !important;
-          line-height: 2.5rem !important;
-          font-weight: 700 !important;
-          color: white !important;
-          margin-top: 2rem !important;
-          margin-bottom: 1rem !important;
-        }
-        .prose h2 {
-          font-size: 1.875rem !important;
-          line-height: 2.25rem !important;
-          font-weight: 600 !important;
-          color: white !important;
-          margin-top: 1.5rem !important;
-          margin-bottom: 0.75rem !important;
-        }
-        .prose h3 {
-          font-size: 1.5rem !important;
-          line-height: 2rem !important;
-          font-weight: 600 !important;
-          color: white !important;
-          margin-top: 1.25rem !important;
-          margin-bottom: 0.5rem !important;
-        }
-        .prose p {
-          color: #d1d5db !important;
-          line-height: 1.75 !important;
-          margin-bottom: 1rem !important;
-        }
-        .prose ul, .prose ol {
-          color: #d1d5db !important;
-          margin-bottom: 1rem !important;
-        }
-        .prose li {
-          color: #d1d5db !important;
-        }
-        .prose blockquote {
-          color: #d1d5db !important;
-          border-left-color: #8b5cf6 !important;
-        }
-        .prose code {
-          color: #10b981 !important;
-          background-color: rgba(16, 185, 129, 0.1) !important;
-        }
-        .prose pre {
-          background-color: rgba(17, 24, 39, 0.5) !important;
-          border-color: #374151 !important;
-        }
-        .prose pre code {
-          color: #10b981 !important;
-          background-color: transparent !important;
-        }
-      `}</style>
     </div>
   );
 }
