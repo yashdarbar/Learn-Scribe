@@ -10,7 +10,7 @@ interface QuizGeneratorProps {
   pageNumber: number;
   docTitle?: string;
   selectedText?: string;
-  chatAction?: 'add' | 'explain' | 'summarize';
+  chatAction?: 'add' | 'explain' | 'summarize' | 'flashcards';
   onClearSelectedText?: () => void;
 }
 

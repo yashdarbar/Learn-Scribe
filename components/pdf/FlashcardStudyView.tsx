@@ -1,23 +1,42 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, RotateCcw, X, Eye, EyeOff } from "lucide-react";
-import { Flashcard } from "@/lib/actions/flashcard-actions";
+import { ChevronLeft, ChevronRight, RotateCcw, X, Eye, EyeOff, Save, Loader2 } from "lucide-react";
+import { Flashcard, saveFlashcardSetWithAuth } from "@/lib/actions/flashcard-actions";
 
 interface FlashcardStudyViewProps {
   flashcards: Flashcard[];
   onClose: () => void;
   title?: string;
+  pdfId?: string;
+  pageNumber?: number;
+  content?: string;
+  isSaved?: boolean;
+  onSaved?: () => void;
 }
 
 export const FlashcardStudyView: React.FC<FlashcardStudyViewProps> = ({
   flashcards,
   onClose,
-  title = "Flashcard Study"
+  title = "Flashcard Study",
+  pdfId,
+  pageNumber,
+  content,
+  isSaved = false,
+  onSaved
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [showProgress, setShowProgress] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveTitle, setSaveTitle] = useState(title);
+  const [localIsSaved, setLocalIsSaved] = useState(isSaved);
+
+  // Update localIsSaved when isSaved prop changes
+  useEffect(() => {
+    console.log("FlashcardStudyView: isSaved prop changed to:", isSaved);
+    setLocalIsSaved(isSaved);
+  }, [isSaved]);
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
@@ -42,7 +61,46 @@ export const FlashcardStudyView: React.FC<FlashcardStudyViewProps> = ({
     setShowAnswer(false);
   };
 
+  const handleSaveSet = async () => {
+    if (localIsSaved) {
+      console.log("Flashcards are already saved");
+      return;
+    }
+
+    if (!pdfId || !pageNumber) {
+      console.error("Missing pdfId or pageNumber for saving");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const result = await saveFlashcardSetWithAuth(
+        flashcards,
+        saveTitle,
+        pdfId,
+        pageNumber,
+        content || ""
+      );
+
+      if (result.success) {
+        // You could add a success toast here
+        console.log("Flashcard set saved successfully!");
+        setLocalIsSaved(true);
+        // Don't close the study view, just mark as saved
+        // The button will show "Saved" now
+        onSaved?.();
+      } else {
+        console.error("Failed to save flashcard set:", result.error);
+      }
+    } catch (err) {
+      console.error("Failed to save flashcard set:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const progress = ((currentIndex + 1) / flashcards.length) * 100;
+  const isLastCard = currentIndex === flashcards.length - 1;
 
   return (
     <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
@@ -172,15 +230,46 @@ export const FlashcardStudyView: React.FC<FlashcardStudyViewProps> = ({
             {showAnswer ? "Show Question" : "Show Answer"}
           </button>
 
-          <button
-            onClick={handleNext}
-            disabled={currentIndex === flashcards.length - 1}
-            className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded-lg font-medium text-xs sm:text-sm"
-          >
-            <span className="hidden sm:inline">Next</span>
-            <span className="sm:hidden">Next</span>
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-          </button>
+          {isLastCard ? (
+            <button
+              onClick={handleSaveSet}
+              disabled={isSaving || localIsSaved}
+              className={`w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 transition text-white rounded-lg font-medium text-xs sm:text-sm ${
+                localIsSaved
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed'
+              }`}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                  <span className="hidden sm:inline">Saving...</span>
+                  <span className="sm:hidden">Save...</span>
+                </>
+              ) : localIsSaved ? (
+                <>
+                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Saved</span>
+                  <span className="sm:hidden">Saved</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Save Set</span>
+                  <span className="sm:hidden">Save</span>
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleNext}
+              className="w-full sm:w-auto flex items-center justify-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-600 hover:bg-gray-700 transition text-white rounded-lg font-medium text-xs sm:text-sm"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <span className="sm:hidden">Next</span>
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          )}
         </div>
 
         {/* ✅ UPDATED: Responsive Keyboard shortcuts hint */}

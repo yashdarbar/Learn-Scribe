@@ -64,7 +64,7 @@ export default function PDFViewerPage() {
 
   // ✅ NEW: Chat integration state - THIS IS THE KEY FIX
   const [pendingChatText, setPendingChatText] = useState<string | null>(null);
-  const [chatAction, setChatAction] = useState<'add' | 'explain' | 'summarize' | null>(null);
+  const [chatAction, setChatAction] = useState<'add' | 'explain' | 'summarize' | 'flashcards' | null>(null);
 
   // ✅ ADD: Page input state for proper synchronization
   const [pageInput, setPageInput] = useState(page.toString());
@@ -282,7 +282,7 @@ export default function PDFViewerPage() {
   const handleCreateFlashcards = () => {
     if (selectedText) {
       setPendingChatText(selectedText);
-      setChatAction('add');
+      setChatAction('flashcards');
 
       // ✅ NEW: Switch to flashcards tab and auto-generate
       setActiveTabNew('flashcards');

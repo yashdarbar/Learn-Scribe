@@ -9,7 +9,7 @@ interface ChatInterfaceProps {
   pdfId: string;
   docTitle?: string;
   selectedText?: string;
-  chatAction?: 'add' | 'explain' | 'summarize';
+  chatAction?: 'add' | 'explain' | 'summarize' | 'flashcards';
   onClearSelectedText?: () => void;
   clearChatTrigger?: number;
 }
@@ -229,7 +229,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       switch (chatAction) {
         case 'add':
           setInput(`"${selectedText}"`);
-          inputRef.current?.focus();
+          // Focus and position cursor at the end after state update
+          setTimeout(() => {
+            if (inputRef.current) {
+              inputRef.current.focus();
+              const textLength = inputRef.current.value.length;
+              inputRef.current.setSelectionRange(textLength, textLength);
+            }
+          }, 50);
           break;
 
         case 'explain':
@@ -404,42 +411,48 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       )}
 
-      {/* Compact selected text preview */}
-      {pendingSelectedText && (
-        <div className="px-4 py-2 bg-purple-900/10 text-xs text-purple-300 border-t border-purple-700/20 flex items-center gap-2">
-          <span>📝</span>
-          <span className="truncate max-w-[250px] italic">
-            "{pendingSelectedText.length > 60 ? pendingSelectedText.slice(0, 60) + "..." : pendingSelectedText}"
-          </span>
-          <button
-            className="ml-auto px-1.5 py-0.5 rounded bg-purple-700/30 hover:bg-purple-700/50 text-xs transition"
-            onClick={() => {
-              setPendingSelectedText(undefined);
-              setInput("");
-            }}
-          >
-            ×
-          </button>
-        </div>
-      )}
-
-      {/* Clean input section */}
+      {/* Unified input section */}
       <div className="px-4 py-3 border-t border-white/10 bg-black/30 flex gap-2 items-end">
-        <textarea
-          ref={inputRef}
-          rows={1}
-          maxLength={3000}
-          className="flex-1 resize-none rounded-xl bg-black/40 border border-white/10 px-3 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm transition min-h-[40px] max-h-[120px]"
-          placeholder={
-            pendingSelectedText
-              ? "Ask about the selected text..."
-              : "Type your message..."
-          }
-          value={input}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          disabled={isLoadingHistory}
-        />
+        <div className="flex-1 relative">
+          <textarea
+            ref={inputRef}
+            rows={2}
+            maxLength={3000}
+            className="w-full resize-none rounded-xl bg-black/40 border border-white/10 px-3 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm transition h-[60px] max-h-[120px] custom-scrollbar"
+            placeholder={
+              pendingSelectedText
+                ? "Ask about the selected text..."
+                : "Type your message..."
+            }
+            value={input}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            disabled={isLoadingHistory}
+          />
+          {pendingSelectedText && (
+            <div className="absolute top-0 left-0 right-0 bottom-0 bg-purple-900/20 border border-purple-500/30 rounded-xl px-3 py-2 pointer-events-none">
+              <div className="text-xs text-purple-300 mb-1 flex items-center gap-2">
+                {/* <span>📝 Selected text:</span> */}
+                <button
+                  className="ml-auto px-1.5 py-0.5 rounded bg-purple-700/50 hover:bg-purple-700/70 text-xs transition pointer-events-auto"
+                  onClick={() => {
+                    setPendingSelectedText(undefined);
+                    setInput("");
+                    // Reset textarea to default size
+                    if (inputRef.current) {
+                      inputRef.current.style.height = '60px';
+                    }
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              {/* <div className="text-xs text-purple-200 line-clamp-2 italic">
+                "{pendingSelectedText.length > 80 ? pendingSelectedText.slice(0, 80) + "..." : pendingSelectedText}"
+              </div> */}
+            </div>
+          )}
+        </div>
         <button
           className="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition text-white disabled:opacity-50 flex items-center justify-center"
           title="Send message"

@@ -195,6 +195,7 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
 
   const handleStudyFlashcards = (set: FlashcardSet) => {
     if (set.flashcards && set.flashcards.length > 0) {
+      setSelectedSet(set);
       setStudyMode({
         isOpen: true,
         flashcards: set.flashcards,
@@ -220,6 +221,7 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
       flashcards: [],
       title: ""
     });
+    setSelectedSet(null);
   };
 
   const closeQuizMode = () => {
@@ -245,10 +247,12 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="flex items-center gap-2 text-gray-400">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-400"></div>
-          <span className="text-sm">Loading study sets...</span>
+      <div className="flex flex-col h-full">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-gray-400">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-400"></div>
+            <span className="text-sm">Loading study sets...</span>
+          </div>
         </div>
       </div>
     );
@@ -256,14 +260,18 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
 
   if (error) {
     return (
-      <div className="text-center py-8">
-        <div className="text-red-400 text-sm">{error}</div>
-        <button
-          onClick={loadAllSets}
-          className="mt-2 px-3 py-1 bg-purple-600 hover:bg-purple-700 transition text-white rounded text-sm"
-        >
-          Try Again
-        </button>
+      <div className="flex flex-col h-full">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-400 text-sm">{error}</div>
+            <button
+              onClick={loadAllSets}
+              className="mt-2 px-3 py-1 bg-purple-600 hover:bg-purple-700 transition text-white rounded text-sm"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -272,60 +280,60 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
 
   if (totalSets === 0) {
     return (
-      <div className="text-center py-8">
-        <BookOpen className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-300 mb-2">No Study Sets</h3>
-        <p className="text-sm text-gray-500">
-          Generate flashcards or quiz questions from page content to see them here.
-        </p>
+      <div className="flex flex-col h-full">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <BookOpen className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-300 mb-2">No Study Sets</h3>
+            <p className="text-sm text-gray-500">
+              Generate flashcards or quiz questions from page content to see them here.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      {/* <div className="flex items-center gap-2">
-        <BookOpen className="w-5 h-5 text-purple-400" />
-        <h3 className="text-lg font-semibold text-white">My Study Sets</h3>
-      </div> */}
-
-      {/* Filter Tabs */}
-      <div className="flex border border-white/10 rounded-lg bg-black/20 overflow-hidden">
-        <button
-          onClick={() => setFilter('all')}
-          className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
-            filter === 'all'
-              ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
-              : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
-          }`}
-        >
-          All ({totalSets})
-        </button>
-        <button
-          onClick={() => setFilter('flashcards')}
-          className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
-            filter === 'flashcards'
-              ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
-              : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
-          }`}
-        >
-          📚 Flashcards ({flashcardSets.length})
-        </button>
-        <button
-          onClick={() => setFilter('quizzes')}
-          className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
-            filter === 'quizzes'
-              ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
-              : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
-          }`}
-        >
-          ❓ Quizzes ({quizSets.length})
-        </button>
+    <div className="flex flex-col h-full">
+      {/* Filter Tabs - Fixed at top */}
+      <div className="flex-shrink-0 mb-4">
+        <div className="flex border border-white/10 rounded-lg bg-black/20 overflow-hidden">
+          <button
+            onClick={() => setFilter('all')}
+            className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
+              filter === 'all'
+                ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
+                : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+            }`}
+          >
+            All ({totalSets})
+          </button>
+          <button
+            onClick={() => setFilter('flashcards')}
+            className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
+              filter === 'flashcards'
+                ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
+                : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+            }`}
+          >
+            📚 Flashcards ({flashcardSets.length})
+          </button>
+          <button
+            onClick={() => setFilter('quizzes')}
+            className={`flex-1 px-3 sm:px-4 py-2 text-sm font-medium transition ${
+              filter === 'quizzes'
+                ? 'text-purple-400 bg-purple-900/20 border-b-2 border-purple-400'
+                : 'text-gray-400 hover:text-gray-300 hover:bg-black/20'
+            }`}
+          >
+            ❓ Quizzes ({quizSets.length})
+          </button>
+        </div>
       </div>
 
-      {/* Combined Sets List */}
-      <div className="space-y-3">
+      {/* Scrollable Sets List */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 pr-2">
         {/* Flashcard Sets */}
         {filteredFlashcardSets.map((set) => (
           <motion.div
@@ -445,6 +453,10 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
           flashcards={studyMode.flashcards}
           onClose={closeStudyMode}
           title={studyMode.title}
+          pdfId={pdfId}
+          pageNumber={selectedSet?.page_number || 1}
+          content={selectedSet?.source_content || ""}
+          isSaved={true}
         />
       )}
 
