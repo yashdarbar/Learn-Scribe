@@ -269,7 +269,7 @@ export default function PdfLibraryPage() {
         >
           <Card className="backdrop-blur-xl bg-black/30 border border-white/10 rounded-2xl shadow-xl p-8">
             {/* Header with back button and title */}
-            <div className="flex items-center gap-4 mb-6">
+            {/* <div className="flex items-center gap-4 mb-6">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -284,7 +284,7 @@ export default function PdfLibraryPage() {
                   Back to Dashboard
                 </Button>
               </motion.div>
-            </div>
+            </div> */}
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
               <h1 className="text-3xl font-bold text-white mb-2 md:mb-0">PDF Learning Hub</h1>
@@ -356,51 +356,44 @@ export default function PdfLibraryPage() {
                 pdfs.map((pdf) => (
                   <motion.div
                     key={pdf.id}
-                    whileHover={{ scale: 1.03, boxShadow: "0 4px 32px 0 rgba(0,0,0,0.15)" }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     onClick={() => router.push(`/pdf/${pdf.id}`)}
                     className="cursor-pointer group relative"
                   >
-                    <Card className="backdrop-blur-xl bg-black/20 border border-white/10 p-6 flex flex-col h-full transition-all">
-                      {/* Delete button - positioned absolutely */}
+                    <Card className="backdrop-blur-xl bg-black/30 border border-white/10 p-4 flex flex-col h-full transition-all hover:border-purple-500/30">
+                      {/* Delete button */}
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={(e) => handleDeleteClick(e, pdf)}
-                        className="absolute top-2 right-2 h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200 opacity-0 group-hover:opacity-100 z-10"
+                        className="absolute top-2 right-2 h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all duration-200 opacity-0 group-hover:opacity-100 z-10"
                         title="Delete PDF"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </Button>
 
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileText className="w-5 h-5 text-purple-400" />
-                        <span className="font-semibold text-white">{pdf.name}</span>
-                        {pdf.status === 'processing' && (
-                          <div className="animate-pulse w-2 h-2 bg-yellow-400 rounded-full"></div>
-                        )}
-                        {pdf.status === 'failed' && (
-                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                        )}
+                      {/* PDF Icon and Name */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 border border-purple-500/30 bg-gray-700/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-white text-sm truncate">{pdf.name}</h3>
+                        </div>
                       </div>
-                      <div className="text-gray-400 text-xs mb-4">Uploaded: {pdf.uploadDate}</div>
-                      <div className="flex gap-4 text-xs text-purple-400 mb-2">
-                        <span>Flashcards: {pdf.flashcards}</span>
-                        <span>Quizzes: {pdf.quizzes}</span>
+
+                      {/* Stats */}
+                      <div className="flex items-center gap-4 mt-auto pt-3 border-t border-white/10">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-400">Flashcards</span>
+                          <span className="text-xs font-semibold text-white">{pdf.flashcards}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-400">Quizzes</span>
+                          <span className="text-xs font-semibold text-white">{pdf.quizzes}</span>
+                        </div>
                       </div>
-                      <div className="w-full bg-purple-900/40 rounded-full h-2 mb-2">
-                        <div
-                          className="bg-gradient-to-r from-purple-400 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${pdf.studyProgress}%` }}
-                        />
-                      </div>
-                      <div className="text-xs text-purple-400">Study Progress: {pdf.studyProgress}%</div>
-                      {pdf.status === 'processing' && (
-                        <div className="text-xs text-yellow-400 mt-2">Processing...</div>
-                      )}
-                      {pdf.status === 'failed' && (
-                        <div className="text-xs text-red-400 mt-2">Upload failed</div>
-                      )}
                     </Card>
                   </motion.div>
                 ))

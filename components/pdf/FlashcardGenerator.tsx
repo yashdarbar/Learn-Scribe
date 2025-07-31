@@ -263,12 +263,6 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 
   return (
     <div className="flex flex-col h-full space-y-3 sm:space-y-4">
-      {/* ✅ UPDATED: Responsive Header */}
-      <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-        <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-        <h3 className="text-base sm:text-lg font-semibold text-white">Generate Flashcards</h3>
-      </div>
-
       {!showPreview ? (
         <>
           {/* ✅ UPDATED: Responsive Content Area */}
@@ -300,9 +294,6 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                   </button>
                 )}
               </div>
-              <div className="text-xs text-gray-500 mt-1 text-right">
-                {content.length}/5000
-              </div>
             </div>
 
             {/* ✅ UPDATED: Responsive Error Display */}
@@ -315,26 +306,28 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
 
           {/* ✅ UPDATED: Responsive Generate Button */}
           <div className="flex-shrink-0 space-y-2 sm:space-y-3">
-            <button
-              onClick={handleGenerate}
-              disabled={!content.trim() || isGenerating}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                  <span className="hidden sm:inline">Generating Flashcards...</span>
-                  <span className="sm:hidden">Generating...</span>
-                </>
-              ) : (
-                <>
-                  <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Generate Flashcards</span>
-                  <span className="sm:hidden">Generate</span>
-                </>
-              )}
-            </button>
-          </div>
+  <div className="flex justify-center">
+    <button
+      onClick={handleGenerate}
+      disabled={!content.trim() || isGenerating}
+      className="w-full sm:w-auto px-3 sm:px-6 py-2 sm:py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded-lg flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm"
+    >
+      {isGenerating ? (
+        <>
+          <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+          <span className="hidden sm:inline">Generating Flashcards...</span>
+          <span className="sm:hidden">Generating...</span>
+        </>
+      ) : (
+        <>
+          <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Generate Flashcards</span>
+          <span className="sm:hidden">Generate</span>
+        </>
+      )}
+    </button>
+  </div>
+</div>
         </>
       ) : (
         <FlashcardPreview

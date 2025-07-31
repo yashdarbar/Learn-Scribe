@@ -9,7 +9,7 @@ interface ChatInterfaceProps {
   pdfId: string;
   docTitle?: string;
   selectedText?: string;
-  chatAction?: 'add' | 'explain' | 'summarize';  // NEW PROP
+  chatAction?: 'add' | 'explain' | 'summarize';
   onClearSelectedText?: () => void;
   clearChatTrigger?: number;
 }
@@ -91,7 +91,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   pdfId,
   docTitle,
   selectedText,
-  chatAction,  // NEW PROP
+  chatAction,
   onClearSelectedText,
   clearChatTrigger,
 }) => {
@@ -100,8 +100,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingSelectedText, setPendingSelectedText] = useState<string | undefined>(undefined);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);  // NEW REF
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Delete modal state
   const [deleteModal, setDeleteModal] = useState<{
@@ -117,7 +118,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     const textarea = inputRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
     }
   }, []);
 
@@ -127,7 +128,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     handleTextareaResize();
   };
 
-  // ✅ ADD: Clear chat functionality
+  // Clear chat functionality
   const handleClearChat = async () => {
     if (messages.length === 0) return;
 
@@ -138,13 +139,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setDeleteModal(prev => ({ ...prev, isDeleting: true }));
 
     try {
-      // Clear from server
       const result = await clearChatHistoryWithAuth(pdfId);
 
       if (result.success) {
-        // Clear from state
         setMessages([]);
-        // Clear from localStorage
         localStorage.removeItem(`pdf-chat-${pdfId}`);
         console.log('Chat history cleared successfully');
       } else {
@@ -161,28 +159,26 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setDeleteModal({ isOpen: false, isDeleting: false });
   };
 
-  // ✅ ADD: Listen for clear chat trigger
+  // Listen for clear chat trigger
   useEffect(() => {
     if (clearChatTrigger && clearChatTrigger > 0) {
       handleClearChat();
     }
   }, [clearChatTrigger]);
 
-  // Fetch chat history (same as before)
+  // Fetch chat history
   useEffect(() => {
     (async () => {
       try {
+        setIsLoadingHistory(true);
         setError(null);
         console.log("🔄 Loading chat history for PDF:", pdfId);
         const history = await getChatHistoryWithAuth(pdfId);
         console.log("📥 Raw chat history from DB:", history);
 
-        // Convert database format to our chat message format
-        // Each DB row should create TWO messages: user message + AI response
         const formattedHistory: ChatMessageType[] = [];
 
         (history || []).forEach((dbRow: any, index: number) => {
-          // Create user message from the 'message' field
           if (dbRow.message && dbRow.message.trim()) {
             formattedHistory.push({
               id: `user-${dbRow.id}-${index}`,
@@ -193,7 +189,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             });
           }
 
-          // Create AI response from the 'response' field
           if (dbRow.response && dbRow.response.trim()) {
             formattedHistory.push({
               id: `ai-${dbRow.id}-${index}`,
@@ -210,11 +205,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       } catch (err: any) {
         console.error("❌ Error loading chat history:", err);
         setError("Failed to load chat history");
+      } finally {
+        setIsLoadingHistory(false);
       }
     })();
   }, [pdfId]);
 
-  // Scroll to bottom on new message (same as before)
+  // Scroll to bottom on new message
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -224,39 +221,35 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     console.log("💬 Current messages state:", messages);
   }, [messages]);
 
-  // NEW: Handle selected text from popup actions
+  // Handle selected text from popup actions
   useEffect(() => {
     if (selectedText && chatAction) {
       setPendingSelectedText(selectedText);
 
       switch (chatAction) {
         case 'add':
-          // Just add to input, let user type their question
           setInput(`"${selectedText}"`);
           inputRef.current?.focus();
           break;
 
         case 'explain':
-          // Auto-send explanation request
           setInput(`Can you explain this: "${selectedText}"`);
           setTimeout(() => handleSend(`Can you explain this: "${selectedText}"`), 100);
           break;
 
         case 'summarize':
-          // Auto-send summarization request
           setInput(`Can you summarize this: "${selectedText}"`);
           setTimeout(() => handleSend(`Can you summarize this: "${selectedText}"`), 100);
           break;
       }
 
-      // Clear the selectedText after processing
       if (onClearSelectedText) {
         setTimeout(() => onClearSelectedText(), 500);
       }
     }
   }, [selectedText, chatAction]);
 
-  // ✅ NEW: Real-time chat with optimistic updates
+  // Real-time chat with optimistic updates
   const handleSend = async (messageOverride?: string) => {
     const messageToSend = messageOverride || input;
     if (!messageToSend.trim() && !pendingSelectedText) return;
@@ -264,7 +257,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setError(null);
     console.log("📤 Sending message:", messageToSend);
 
-    // 1. Add user message immediately (optimistic update)
+    // Add user message immediately
     const userMessage: ChatMessageType = {
       id: `user-${Date.now()}`,
       content: messageToSend.trim(),
@@ -273,10 +266,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       selectedText: pendingSelectedText,
     };
 
-    console.log("➕ Adding user message to state:", userMessage);
     setMessages(prev => [...prev, userMessage]);
 
-    // 2. Add loading message for AI response
+    // Add loading message for AI response
     const loadingMessage: ChatMessageType = {
       id: `ai-${Date.now()}`,
       content: 'AI is thinking...',
@@ -285,20 +277,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       timestamp: new Date(),
     };
 
-    console.log("➕ Adding loading message to state:", loadingMessage);
     setMessages(prev => [...prev, loadingMessage]);
 
-    // Clear input immediately for better UX
+    // Clear input immediately
     setInput("");
     setPendingSelectedText(undefined);
-    // Reset textarea height
     if (inputRef.current) {
       inputRef.current.style.height = 'auto';
     }
 
     try {
-      // 3. Call server action
-      console.log("🤖 Calling AI with message:", messageToSend);
       const result = await sendMessageToAIWithAuth({
         pdfId,
         message: messageToSend,
@@ -307,11 +295,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         type: pendingSelectedText ? "explain" : "chat",
       });
 
-      console.log("🤖 AI response result:", result);
-
       if (result.success) {
-        // 4. Replace loading message with actual response
-        console.log("✅ Replacing loading message with AI response:", result.response);
         setMessages(prev =>
           prev.map(msg =>
             msg.id === loadingMessage.id
@@ -319,14 +303,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   ...msg,
                   content: result.response || 'No response received',
                   loading: false,
-                  id: msg.id // Keep the existing ID
+                  id: msg.id
                 }
               : msg
           )
         );
       } else {
-        // Handle error - replace loading with error message
-        console.log("❌ AI response error:", result.error);
         setMessages(prev =>
           prev.map(msg =>
             msg.id === loadingMessage.id
@@ -342,7 +324,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         setError(result.error || "AI failed to respond");
       }
     } catch (err: any) {
-      // Handle network error
       console.error("❌ Network error sending message:", err);
       setMessages(prev =>
         prev.map(msg =>
@@ -370,105 +351,105 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-black/20 rounded-xl border border-white/10 overflow-hidden">
-      {/* Chat messages - IMPROVED with proper user/AI message display */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar min-h-0">
-        {messages.length === 0 && !loading && (
-          <div className="text-center text-gray-400 mt-8">
-            <div className="text-sm">💬 No messages yet</div>
-            <div className="text-xs mt-2">Select text from the PDF or ask a question to get started!</div>
-          </div>
-        )}
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-            <div className={`max-w-[80%] rounded-lg px-4 py-3 ${
-              msg.role === 'user'
-                ? 'bg-purple-600 text-white rounded-br-md'
-                : msg.error
-                  ? 'bg-red-900/20 border border-red-500/20 text-red-200 rounded-bl-md'
-                  : msg.loading
-                    ? 'bg-yellow-900/20 border border-yellow-500/20 text-yellow-200 rounded-bl-md'
-                    : 'bg-black/40 text-gray-200 border border-white/10 rounded-bl-md'
-            }`}>
-              <p className="text-sm">{msg.content}</p>
-              <div className="flex items-center gap-1 mt-2 text-xs opacity-70">
-                {msg.role === 'user' ? (
-                  <>
-                    <span>You</span>
-                    <span>•</span>
-                    <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>AI</span>
-                    <span>•</span>
-                    <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </>
-                )}
+      {/* Chat messages - Clean and simple */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">
+        {isLoadingHistory ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm text-gray-400">Loading chat...</span>
               </div>
             </div>
           </div>
-        ))}
+        ) : messages.length === 0 && !loading ? (
+          <div className="text-center text-gray-400 mt-8">
+            <div className="text-sm">Ask me anything about this PDF!</div>
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-3`}>
+              <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+                msg.role === 'user'
+                  ? 'bg-purple-600 text-white'
+                  : msg.error
+                    ? 'bg-red-900/20 border border-red-500/20 text-red-200'
+                    : msg.loading
+                      ? 'bg-gray-700/50 text-gray-300'
+                      : 'bg-gray-800/50 text-gray-100 border border-gray-700/50'
+              }`}>
+                {msg.loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                    <span className="text-sm">AI is thinking...</span>
+                  </div>
+                ) : (
+                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                )}
+              </div>
+            </div>
+          ))
+        )}
         <div ref={chatEndRef} />
       </div>
 
-      {/* Error display (same as before) */}
+      {/* Subtle error display */}
       {error && (
-        <div className="text-xs text-red-400 px-4 pb-2 bg-red-900/10 border-t border-red-500/20">
-          ❌ {error}
+        <div className="px-4 py-2 text-xs text-red-400 bg-red-900/10 border-t border-red-500/20">
+          {error}
         </div>
       )}
 
-      {/* Selected text context preview - IMPROVED */}
+      {/* Compact selected text preview */}
       {pendingSelectedText && (
-        <div className="px-4 py-2 bg-purple-900/20 text-xs text-purple-200 border-t border-purple-700/20 flex items-center gap-2">
-          <span className="text-purple-400">📝 Selected:</span>
-          <span className="truncate max-w-[200px] italic">
-            "{pendingSelectedText.length > 80 ? pendingSelectedText.slice(0, 80) + "..." : pendingSelectedText}"
+        <div className="px-4 py-2 bg-purple-900/10 text-xs text-purple-300 border-t border-purple-700/20 flex items-center gap-2">
+          <span>📝</span>
+          <span className="truncate max-w-[250px] italic">
+            "{pendingSelectedText.length > 60 ? pendingSelectedText.slice(0, 60) + "..." : pendingSelectedText}"
           </span>
           <button
-            className="ml-auto px-2 py-1 rounded bg-purple-700/30 hover:bg-purple-700/50 text-xs text-purple-100 transition"
+            className="ml-auto px-1.5 py-0.5 rounded bg-purple-700/30 hover:bg-purple-700/50 text-xs transition"
             onClick={() => {
               setPendingSelectedText(undefined);
               setInput("");
             }}
           >
-            Clear
+            ×
           </button>
         </div>
       )}
 
-      {/* Input section - IMPROVED with larger textarea */}
-      <div className="px-4 py-3 border-t border-white/10 bg-black/30 flex gap-2 items-end flex-shrink-0">
+      {/* Clean input section */}
+      <div className="px-4 py-3 border-t border-white/10 bg-black/30 flex gap-2 items-end">
         <textarea
-          ref={inputRef}  // NEW REF
+          ref={inputRef}
           rows={1}
           maxLength={3000}
-          className="flex-1 resize-none rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm disabled:opacity-50 transition min-h-[80px] max-h-[200px]"
+          className="flex-1 resize-none rounded-xl bg-black/40 border border-white/10 px-3 py-2 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm transition min-h-[40px] max-h-[120px]"
           placeholder={
             pendingSelectedText
               ? "Ask about the selected text..."
-              : "Type your message, paste page content for flashcards, or select text from the PDF..."
+              : "Type your message..."
           }
           value={input}
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
-          disabled={false} // Remove loading state from input to allow typing while AI responds
+          disabled={isLoadingHistory}
         />
         <button
-          className="p-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition text-white disabled:opacity-50 flex items-center justify-center"
+          className="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition text-white disabled:opacity-50 flex items-center justify-center"
           title="Send message"
           onClick={() => handleSend()}
-          disabled={!input.trim() && !pendingSelectedText}
+          disabled={!input.trim() && !pendingSelectedText || isLoadingHistory}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-7.5-15-7.5v6l10 1.5-10 1.5v6z" />
           </svg>
         </button>
-      </div>
-
-      {/* Character count */}
-      <div className="text-xs text-gray-500 px-4 pb-2 text-right">
-        {input.length}/3000
       </div>
 
       {/* Custom Delete Confirmation Modal */}

@@ -384,43 +384,6 @@ export default function PDFViewerPage() {
                 <Menu className="w-4 h-4" />
               </button>
 
-              {/* Desktop action buttons */}
-              <div className="hidden sm:flex items-center gap-2">
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-600/80 hover:bg-purple-600 transition text-white text-sm"
-                  title="Download PDF"
-                >
-                  <Download className="w-4 h-4" />
-                  <span className="hidden lg:inline">Download</span>
-                </button>
-                <button
-                  onClick={handleOpenInNewTab}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-600/80 hover:bg-gray-600 transition text-white text-sm"
-                  title="Open in new tab"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span className="hidden lg:inline">Open</span>
-                </button>
-              </div>
-
-              {/* Mobile action buttons */}
-              <div className="sm:hidden flex items-center gap-1">
-                <button
-                  onClick={handleDownload}
-                  className="p-2 rounded-lg bg-purple-600/80 hover:bg-purple-600 transition text-white"
-                  title="Download PDF"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={handleOpenInNewTab}
-                  className="p-2 rounded-lg bg-gray-600/80 hover:bg-gray-600 transition text-white"
-                  title="Open in new tab"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </button>
-              </div>
             </div>
           </div>
         </motion.header>
@@ -673,10 +636,6 @@ export default function PDFViewerPage() {
               />
             ) : activeTabNew === 'flashcards' ? (
               <div className="flex flex-col h-full p-2 sm:p-4">
-                <div className="text-center mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">Generate Flashcards</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">Paste page content to create study cards</p>
-                </div>
                 <FlashcardGenerator
                   pdfId={pdfId}
                   pageNumber={page}

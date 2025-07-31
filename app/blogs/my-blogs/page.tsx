@@ -252,7 +252,7 @@ export default function MyBlogsPage() {
           className="w-full max-w-6xl relative z-10"
         >
           <Card className="backdrop-blur-xl bg-black/30 border border-white/10 rounded-2xl shadow-xl p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            {/* <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
               <div className="flex items-center gap-4">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -302,7 +302,65 @@ export default function MyBlogsPage() {
     </Button>
   </motion.div>
 </div>
-            </div>
+            </div> */}
+          <div className="flex flex-col gap-6 mb-8">
+  {/* Header Section */}
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="flex items-center gap-4">
+      {/* <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      >
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/blogs")}
+          className="p-2 hover:bg-white/10 text-gray-400 hover:text-gray-300 transition-all duration-300"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+      </motion.div> */}
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">My Blogs</h1>
+        <p className="text-gray-400">Manage your published and draft blogs</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Search and Actions Section */}
+  <div className="flex flex-col sm:flex-row gap-3">
+    {/* Search Input */}
+    <div className="relative flex-1 min-w-0">
+      <input
+        type="text"
+        placeholder="Search your blogs..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-2 pr-10 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <Search className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+    </div>
+
+    {/* Action Button */}
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      className="flex-shrink-0"
+    >
+      <Button
+        asChild
+        className="w-full sm:w-auto bg-gradient-to-r from-blue-600/80 to-blue-700/80 hover:from-blue-600 hover:to-blue-700 border border-blue-500/30 hover:border-blue-500/50 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 px-3 sm:px-4"
+      >
+        <Link href="/editor">
+          <Plus className="w-4 h-4 sm:mr-2" />
+          <span className="hidden xs:inline sm:inline">Write New Blog</span>
+          <span className="xs:hidden sm:hidden">Write</span>
+        </Link>
+      </Button>
+    </motion.div>
+  </div>
+</div>
 
             {/* Loading state */}
             {loading && (

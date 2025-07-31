@@ -213,7 +213,7 @@ export default function BlogsPage() {
         >
           <Card className="backdrop-blur-xl bg-black/30 border border-white/10 rounded-2xl shadow-xl p-8">
             {/* Back to Dashboard button in left corner */}
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -228,7 +228,7 @@ export default function BlogsPage() {
                   Back to Dashboard
                 </Button>
               </motion.div>
-            </div>
+            </div> */}
 
             {/* Heading and action buttons */}
             <div className="flex flex-col gap-6 mb-8">
