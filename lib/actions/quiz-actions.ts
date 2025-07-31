@@ -51,38 +51,42 @@ export async function generateQuizWithAuth(content: string, pdfId: string, pageN
     const model = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Generate exactly 5 multiple choice quiz questions from the following content.
-Return ONLY a valid JSON array with no markdown formatting, code blocks, or additional text.
+Return ONLY a valid JSON object with no markdown formatting, code blocks, or additional text.
 
-Format: [
-  {
-    "question": "What is the main topic discussed?",
-    "option_a": "Option A text",
-    "option_b": "Option B text",
-    "option_c": "Option C text",
-    "option_d": "Option D text",
-    "correct_answer": "A",
-    "difficulty_level": "medium",
-    "explanation": "Brief explanation of why this is correct"
-  }
-]
+Format: {
+  "quiz_title": "A concise, descriptive title for this quiz based on the content",
+  "quiz_questions": [
+    {
+      "question": "What is the main topic discussed?",
+      "option_a": "Option A text",
+      "option_b": "Option B text",
+      "option_c": "Option C text",
+      "option_d": "Option D text",
+      "correct_answer": "A",
+      "difficulty_level": "medium",
+      "explanation": "Brief explanation of why this is correct"
+    }
+  ]
+}
 
 Content: ${content}
 
 Requirements:
+- Generate a descriptive quiz title (3-8 words) based on the main topic
 - Exactly 5 multiple choice questions
 - Each question must have 4 distinct options (A, B, C, D)
 - One correct answer per question (A, B, C, or D)
 - Mix of difficulty levels (easy, medium, hard)
 - Clear, specific questions based on the content
 - Brief explanations for correct answers
-- Return only the JSON array, no other text or formatting`;
+- Return only the JSON object, no other text or formatting`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
     // Parse the JSON response with robust error handling
-    let quizQuestions: QuizQuestion[];
+    let quizData: { quiz_title: string; quiz_questions: QuizQuestion[] };
     try {
       let cleanedText = text.trim();
 
@@ -98,51 +102,52 @@ Requirements:
       cleanedText = cleanedText.replace(/^`+|`+$/g, '').trim();
 
       // Parse the cleaned JSON
-      quizQuestions = JSON.parse(cleanedText);
+      quizData = JSON.parse(cleanedText);
 
-      // Validate the response
-      if (!Array.isArray(quizQuestions) || quizQuestions.length !== 5) {
-        throw new Error(`Expected exactly 5 quiz questions, received ${quizQuestions?.length || 0}`);
+      // Validate the structure
+      if (!quizData.quiz_questions || !Array.isArray(quizData.quiz_questions)) {
+        throw new Error("Invalid quiz questions format");
       }
 
-      // Validate each question structure
-      quizQuestions.forEach((question, index) => {
+      // Validate each question
+      for (const question of quizData.quiz_questions) {
         if (!question.question || !question.option_a || !question.option_b ||
-            !question.option_c || !question.option_d || !question.correct_answer) {
-          throw new Error(`Quiz question ${index + 1} missing required fields`);
+            !question.option_c || !question.option_d || !question.correct_answer ||
+            !question.difficulty_level) {
+          throw new Error("Invalid question format");
         }
 
+        // Validate correct answer
         if (!['A', 'B', 'C', 'D'].includes(question.correct_answer)) {
-          throw new Error(`Quiz question ${index + 1} has invalid correct_answer`);
+          throw new Error("Invalid correct answer");
         }
-      });
 
-      // Add default values for missing properties
-      quizQuestions = quizQuestions.map((question, index) => ({
-        ...question,
-        difficulty_level: question.difficulty_level || 'medium',
-        card_order: index + 1
-      }));
+        // Validate difficulty level
+        if (!['easy', 'medium', 'hard'].includes(question.difficulty_level)) {
+          throw new Error("Invalid difficulty level");
+        }
+      }
+
+      return {
+        success: true,
+        quiz_questions: quizData.quiz_questions,
+        quiz_title: quizData.quiz_title || `Quiz - Page ${pageNumber}`
+      };
 
     } catch (parseError) {
-      console.error('Failed to parse Gemini response:', parseError);
-      console.error('Raw response:', text);
+      console.error("❌ Quiz generation parse error:", parseError);
+      console.error("Raw response:", text);
       return {
         success: false,
-        error: `Failed to parse quiz data: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`
+        error: "Failed to parse quiz questions. Please try again."
       };
     }
 
-    return {
-      success: true,
-      quiz_questions: quizQuestions
-    };
-
   } catch (error) {
-    console.error('Error in generateQuizWithAuth:', error);
+    console.error("❌ Quiz generation error:", error);
     return {
       success: false,
-      error: "Failed to generate quiz questions"
+      error: "Failed to generate quiz questions. Please try again."
     };
   }
 }

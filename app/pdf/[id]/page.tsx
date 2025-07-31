@@ -279,6 +279,24 @@ export default function PDFViewerPage() {
     }
   };
 
+  const handleCreateFlashcards = () => {
+    if (selectedText) {
+      setPendingChatText(selectedText);
+      setChatAction('add');
+
+      // ✅ NEW: Switch to flashcards tab and auto-generate
+      setActiveTabNew('flashcards');
+
+      // Open chat sidebar on mobile
+      if (window.innerWidth < 768) {
+        setChatOpen(true);
+        setSidebarOpen(true);
+      }
+
+      handleClosePopup();
+    }
+  };
+
   const handleClosePopup = () => {
     setSelectedText(null);
     setPopupPos(null);
@@ -414,7 +432,7 @@ export default function PDFViewerPage() {
                 onAddToChat={handleAddToChat}
                 onExplain={handleExplain}
                 onSummarize={handleSummarize}
-                onAsk={handleAsk}
+                onCreateFlashcards={handleCreateFlashcards}
                 onClose={handleClosePopup}
                 loading={popupLoading}
               />
@@ -647,10 +665,6 @@ export default function PDFViewerPage() {
               </div>
             ) : activeTabNew === 'quiz' ? (
               <div className="flex flex-col h-full p-2 sm:p-4">
-                <div className="text-center mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">Generate Quiz</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">Create multiple choice questions from page content</p>
-                </div>
                 <QuizGenerator
                   pdfId={pdfId}
                   pageNumber={page}
@@ -662,10 +676,6 @@ export default function PDFViewerPage() {
               </div>
             ) : activeTabNew === 'sets' ? (
               <div className="flex flex-col h-full p-2 sm:p-4">
-                <div className="text-center mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg font-semibold text-white mb-1 sm:mb-2">My Study Sets</h3>
-                  <p className="text-xs sm:text-sm text-gray-400">View and manage your saved flashcards and quizzes</p>
-                </div>
                 <MySets pdfId={pdfId} />
               </div>
             ) : null}
@@ -816,10 +826,10 @@ export default function PDFViewerPage() {
                 </div>
               ) : activeTabNew === 'sets' ? (
                 <div className="flex flex-col h-full p-4">
-                  <div className="text-center mb-6">
+                  {/* <div className="text-center mb-6">
                     <h3 className="text-lg font-semibold text-white mb-2">My Study Sets</h3>
                     <p className="text-sm text-gray-400">View and manage your saved flashcards and quizzes</p>
-                  </div>
+                  </div> */}
                   <MySets pdfId={pdfId} />
                 </div>
               ) : null}

@@ -285,10 +285,10 @@ export const MySets: React.FC<MySetsProps> = ({ pdfId }) => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-2">
+      {/* <div className="flex items-center gap-2">
         <BookOpen className="w-5 h-5 text-purple-400" />
         <h3 className="text-lg font-semibold text-white">My Study Sets</h3>
-      </div>
+      </div> */}
 
       {/* Filter Tabs */}
       <div className="flex border border-white/10 rounded-lg bg-black/20 overflow-hidden">

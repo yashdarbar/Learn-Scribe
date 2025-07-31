@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clipboard, MessageCircle, Info, Sparkles, Plus, X } from "lucide-react";
+import { Clipboard, MessageCircle, Info, Sparkles, Plus, X, BookOpen } from "lucide-react";
 
 interface TextSelectionPopupProps {
   selectedText: string;
@@ -9,7 +9,7 @@ interface TextSelectionPopupProps {
   onAddToChat: () => void;
   onExplain: () => void;
   onSummarize: () => void;
-  onAsk: () => void;
+  onCreateFlashcards: () => void;
   onClose: () => void;
   loading?: boolean;
   disabled?: boolean;
@@ -41,10 +41,10 @@ const actions = [
     handler: (props: TextSelectionPopupProps) => props.onSummarize(),
   },
   {
-    key: "ask",
-    label: "Ask Question",
-    icon: MessageCircle,
-    handler: (props: TextSelectionPopupProps) => props.onAsk(),
+    key: "flashcards",
+    label: "Create Flashcards",
+    icon: BookOpen,
+    handler: (props: TextSelectionPopupProps) => props.onCreateFlashcards(),
   },
 ];
 
@@ -55,7 +55,7 @@ export const TextSelectionPopup: React.FC<TextSelectionPopupProps> = ({
   onAddToChat,
   onExplain,
   onSummarize,
-  onAsk,
+  onCreateFlashcards,
   onClose,
   loading = false,
   disabled = false,
@@ -129,10 +129,10 @@ export const TextSelectionPopup: React.FC<TextSelectionPopupProps> = ({
         </div>
 
         {/* ✅ UPDATED: Responsive Text Display */}
-        <div className="text-xs sm:text-sm text-gray-200 bg-gray-800/80 rounded p-2 sm:p-3 max-h-20 sm:max-h-24 overflow-y-auto mb-2 border border-purple-700/10">
-          {selectedText.length > (window.innerWidth < 768 ? 80 : 120)
-            ? selectedText.slice(0, window.innerWidth < 768 ? 80 : 120) + "..."
-            : selectedText}
+        <div className="text-xs sm:text-sm text-gray-200 bg-gray-800/80 rounded p-2 sm:p-3 border border-purple-700/10">
+          <div className="line-clamp-2">
+            {selectedText}
+          </div>
         </div>
 
         {/* ✅ UPDATED: Responsive Action Buttons */}
@@ -150,7 +150,7 @@ export const TextSelectionPopup: React.FC<TextSelectionPopupProps> = ({
                   onAddToChat,
                   onExplain,
                   onSummarize,
-                  onAsk,
+                  onCreateFlashcards,
                   onClose,
                   loading,
                   disabled,
