@@ -326,7 +326,7 @@ export const QuizGenerator: React.FC<QuizGeneratorProps> = ({
                   onChange={handleContentChange}
                   disabled={isGenerating}
                   placeholder="Paste the page content here... "
-                  className="w-full h-full min-h-[120px] sm:min-h-[200px] resize-none rounded-lg bg-black/40 border border-white/10 px-2 sm:px-3 py-2 sm:py-3 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm transition-all duration-200"
+                  className="w-full h-full min-h-[120px] sm:min-h-[200px] resize-none rounded-lg bg-black/40 border border-white/10 px-2 sm:px-3 py-2 sm:py-3 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm transition-all duration-200 custom-scrollbar"
                   maxLength={5000}
                 />
                 {content.trim() && (

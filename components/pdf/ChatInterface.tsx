@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { sendMessageToAIWithAuth, getChatHistoryWithAuth, clearChatHistoryWithAuth } from "@/lib/actions/chat-actions";
 import ChatMessage from "./ChatMessage";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, X } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ChatInterfaceProps {
@@ -434,7 +434,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <div className="text-xs text-purple-300 mb-1 flex items-center gap-2">
                 {/* <span>📝 Selected text:</span> */}
                 <button
-                  className="ml-auto px-1.5 py-0.5 rounded bg-purple-700/50 hover:bg-purple-700/70 text-xs transition pointer-events-auto"
+                  className="ml-auto px-1 rounded bg-gray-700/50 hover:bg-gray-600/50 text-xs transition pointer-events-auto"
                   onClick={() => {
                     setPendingSelectedText(undefined);
                     setInput("");
@@ -444,7 +444,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     }
                   }}
                 >
-                  ×
+                  <X className="w-3 h-3" />
                 </button>
               </div>
               {/* <div className="text-xs text-purple-200 line-clamp-2 italic">
