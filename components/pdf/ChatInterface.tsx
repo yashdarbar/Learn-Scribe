@@ -412,7 +412,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       )}
 
       {/* Unified input section */}
-      <div className="px-4 py-3 border-t border-white/10 bg-black/30 flex gap-2 items-end">
+      <div className="px-4 py-3 border-t border-white/10 bg-black/30 flex gap-2 items-start">
         <div className="flex-1 relative">
           <textarea
             ref={inputRef}
@@ -454,7 +454,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           )}
         </div>
         <button
-          className="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition text-white disabled:opacity-50 flex items-center justify-center"
+          className="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 transition text-white disabled:opacity-50 flex items-center justify-center mt-1"
           title="Send message"
           onClick={() => handleSend()}
           disabled={!input.trim() && !pendingSelectedText || isLoadingHistory}
