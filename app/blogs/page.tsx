@@ -12,6 +12,7 @@ import { getPublishedBlogs } from "@/lib/actions/blog-actions";
 import { BlogWithDetails } from "@/types/blog";
 import BlogReader from "@/components/blog/BlogReader";
 import { createClient } from "@/utils/supabase/client";
+import { Navbar } from "@/components/navbar";
 
 // --- RetroGrid copied from dashboard ---
 const RetroGrid = ({ angle = 65, cellSize = 60, opacity = 0.3, lineColor = "rgba(120,119,198,0.3)" }) => {
@@ -152,48 +153,7 @@ export default function BlogsPage() {
       <RetroGrid />
       <div className="absolute top-0 z-[0] h-screen w-screen bg-blue-950/10 bg-[radial-gradient(ellipse_20%_80%_at_50%_-20%,rgba(59,130,246,0.3),rgba(255,255,255,0))]" />
 
-      {/* Header - Copied from dashboard with blue theme */}
-      <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-white/10 bg-black/50 backdrop-blur-xl">
-        <div className="text-base sm:text-lg lg:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-[linear-gradient(180deg,_#FFF_0%,_rgba(255,_255,_255,_0.7)_100%)] flex-1 min-w-0 pr-4">
-          <span className="truncate">
-            Learn-Scribe
-          </span>
-        </div>
-
-  <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
-    <div className="relative inline-block overflow-hidden rounded-full p-[1px]">
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
-      <Avatar className="relative bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent border border-white/10 w-8 h-8 sm:w-10 sm:h-10">
-        <span className="text-sm sm:text-lg font-semibold text-white">
-          {user?.user_metadata?.full_name?.[0] || user?.email?.[0]}
-        </span>
-      </Avatar>
-    </div>
-
-    <span className="relative inline-block overflow-hidden rounded-full p-[1px]">
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-300/20 to-orange-200/20 rounded-full" />
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleLogout}
-        disabled={loading}
-        aria-label="Logout"
-        className="
-          relative
-          h-8 w-8 sm:h-10 sm:w-10 rounded-full
-          bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent
-          border border-white/10
-          hover:from-zinc-300/10 hover:via-purple-400/30
-          text-white flex items-center justify-center
-          transition-all
-          p-0
-        "
-      >
-        <LogOut className="w-4 h-4" />
-      </Button>
-    </span>
-  </div>
-</header>
+      <Navbar user={user} />
 
       {/* Main Content */}
       <div className="relative z-10 flex items-center justify-center py-8 px-2">

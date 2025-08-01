@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { ChevronRight, Monitor, AlertCircle } from "lucide-react"
+import { ChevronRight, Monitor, AlertCircle, PenTool, Sparkles } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -83,6 +83,103 @@ const ScreenSizeNotice = () => {
         </div>
       </div>
     </>
+  )
+}
+
+const BlogEditorShowcase = () => {
+  return (
+    <div className="py-16 sm:py-20 lg:py-24">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left side - Image */}
+          <div className="relative order-2 lg:order-1">
+            <div className="relative w-full aspect-[16/10] overflow-hidden rounded-xl border border-gray-800 shadow-2xl">
+              <Image
+                src="/editor-image.png"
+                alt="Blog Editor with AI Assistant"
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-orange-500/10 opacity-50" />
+            </div>
+          </div>
+
+          {/* Right side - Content */}
+          <div className="order-1 lg:order-2 space-y-6 max-w-xl">
+                         {/* Feature badge */}
+             <div className="inline-flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 bg-gradient-to-tr from-zinc-300/5 via-gray-400/5 to-transparent border-[2px] border-white/5 rounded-2xl sm:rounded-3xl group cursor-default">
+               <PenTool className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+               <span className="text-xs sm:text-sm text-gray-400 font-geist">Blog Editor</span>
+               <ChevronRight className="inline w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 group-hover:translate-x-1 duration-300 flex-shrink-0" />
+             </div>
+
+            {/* Title */}
+            <h3 className="text-3xl sm:text-4xl lg:text-5xl font-geist tracking-tight">
+              <span className="text-white">Write with </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-orange-200">AI Intelligence</span>
+            </h3>
+
+            {/* Description */}
+            <p className="text-lg text-gray-300 leading-relaxed max-w-lg">
+              Create compelling blog posts with the help of our AI assistant. Get real-time suggestions,
+              improve your writing, and craft engaging content that resonates with your audience.
+            </p>
+
+            {/* Features list */}
+            <div className="space-y-4">
+                             <div className="flex items-start gap-3">
+                 <div className="w-6 h-6 rounded-full bg-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                   <Sparkles className="w-3 h-3 text-white" />
+                 </div>
+                 <div>
+                   <h4 className="text-white font-medium">AI-Powered Suggestions</h4>
+                   <p className="text-sm text-gray-400">Get intelligent writing suggestions and content improvements</p>
+                 </div>
+               </div>
+
+               <div className="flex items-start gap-3">
+                 <div className="w-6 h-6 rounded-full bg-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                   <PenTool className="w-3 h-3 text-white" />
+                 </div>
+                 <div>
+                   <h4 className="text-white font-medium">Rich Text Editor</h4>
+                   <p className="text-sm text-gray-400">Professional editing tools with markdown support</p>
+                 </div>
+               </div>
+
+               <div className="flex items-start gap-3">
+                 <div className="w-6 h-6 rounded-full bg-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                   <ChevronRight className="w-3 h-3 text-white" />
+                 </div>
+                 <div>
+                   <h4 className="text-white font-medium">One-Click Publishing</h4>
+                   <p className="text-sm text-gray-400">Publish your content directly to your blog platform</p>
+                 </div>
+               </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="pt-4">
+              <span className="relative inline-block overflow-hidden rounded-full p-[1.5px]">
+                <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                <div className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-gray-950 text-xs font-medium backdrop-blur-3xl">
+                  <Link
+                    href="/editor"
+                    className="inline-flex rounded-full text-center group items-center justify-center bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent text-white border-input border-[1px] hover:bg-gradient-to-tr hover:from-zinc-300/10 hover:via-purple-400/30 hover:to-transparent transition-all duration-300 py-3 px-6 gap-2"
+                  >
+                    <PenTool className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span>Start Writing</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -184,6 +281,8 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                 </div>
               </div>
             )}
+            {/* Blog Editor Showcase */}
+            <BlogEditorShowcase />
           </div>
         </section>
       </div>

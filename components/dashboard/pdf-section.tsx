@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
-import { BookOpen, ChevronRight } from "lucide-react"
+import { BookOpen, ChevronRight, MessageSquare, FileText, Sparkles, Brain } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 export function PdfSection() {
   return (
@@ -11,96 +12,96 @@ export function PdfSection() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-orange-500/10 to-transparent rounded-xl" />
-
-      <div className="relative z-10 flex flex-col h-full justify-between p-8 rounded-xl border border-white/10 bg-black/20 backdrop-blur-xl">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="p-3 bg-gradient-to-tr from-purple-500/20 to-orange-500/20 rounded-xl border border-purple-500/20">
-            <BookOpen className="w-8 h-8 text-purple-400" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-1">PDF Learning Hub</h2>
-            <p className="text-gray-400 text-sm">Interactive study materials</p>
-          </div>
-        </div>
-
-        {/* Description */}
-        <p className="text-gray-300 text-lg leading-relaxed mb-8">
-          Transform any document into interactive study materials. Generate flashcards, create quizzes, and track your learning progress.
-        </p>
-
-        {/* Primary CTA */}
-        <div className="flex justify-center">
-          <span className="relative inline-block overflow-hidden rounded-full p-[1.5px] w-48">
-            <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-            <div className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-gray-950 text-xs font-medium backdrop-blur-3xl">
-              <Link
-                href="/pdf"
-                className="inline-flex rounded-full text-center group items-center justify-center bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent text-gray-300 border-input border-[1px] hover:bg-gradient-to-tr hover:from-zinc-300/10 hover:via-purple-400/30 hover:to-transparent transition-all duration-300 py-3 px-6 text-sm font-medium w-full"
-              >
-                <span>Read PDFs</span>
-                <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 duration-300" />
-              </Link>
+      <div className="relative z-10 h-full p-8 rounded-xl backdrop-blur-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full items-center">
+          {/* Left side - Content */}
+          <div className="space-y-6">
+            {/* Feature badge */}
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 bg-gradient-to-tr from-zinc-300/5 via-gray-400/5 to-transparent border-[2px] border-white/5 rounded-2xl sm:rounded-3xl group cursor-default">
+              <Brain className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+              <span className="text-xs sm:text-sm text-gray-400 font-geist">AI Assistant</span>
+              <ChevronRight className="inline w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 group-hover:translate-x-1 duration-300 flex-shrink-0" />
             </div>
-          </span>
+
+            {/* Title */}
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-geist tracking-tight">
+              <span className="text-white">PDF Learning with </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-orange-200">AI Intelligence</span>
+            </h2>
+
+            {/* Description */}
+            <p className="text-gray-300 leading-relaxed">
+              Upload any PDF and get an AI assistant to help you learn. Create flashcards, generate quizzes,
+              and chat with your documents to understand complex topics better.
+            </p>
+
+            {/* Features list */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <FileText className="w-2.5 h-2.5 text-white" />
+                </div>
+                <div>
+                  <h4 className="text-white font-medium text-sm">Upload & Process</h4>
+                  <p className="text-xs text-gray-400">Upload any PDF and let AI extract key information</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Sparkles className="w-2.5 h-2.5 text-white" />
+                </div>
+                <div>
+                  <h4 className="text-white font-medium text-sm">Generate Flashcards</h4>
+                  <p className="text-xs text-gray-400">Create interactive flashcards from PDF content</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <MessageSquare className="w-2.5 h-2.5 text-white" />
+                </div>
+                <div>
+                  <h4 className="text-white font-medium text-sm">AI Chat Assistant</h4>
+                  <p className="text-xs text-gray-400">Ask questions and get instant answers from your PDF</p>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="pt-4">
+              <span className="relative inline-block overflow-hidden rounded-full p-[1.5px]">
+                <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                <div className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-gray-950 text-xs font-medium backdrop-blur-3xl">
+                  <Link
+                    href="/pdf"
+                    className="inline-flex rounded-full text-center group items-center justify-center bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent text-white border-input border-[1px] hover:bg-gradient-to-tr hover:from-zinc-300/10 hover:via-purple-400/30 hover:to-transparent transition-all duration-300 py-3 px-6 gap-2"
+                  >
+                    <BookOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span>Start Learning</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </span>
+            </div>
+          </div>
+
+          {/* Right side - Image */}
+          <div className="relative order-first lg:order-last">
+            <div className="relative w-full aspect-[16/10] overflow-hidden rounded-xl border border-gray-800 shadow-2xl">
+              <Image
+                src="/pdf-image.png"
+                alt="PDF AI Assistant Interface"
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-orange-500/10 opacity-50" />
+            </div>
+          </div>
         </div>
       </div>
     </motion.section>
   )
 }
-
-
-// import { Button } from "@/components/ui/button"
-// import { BookOpen, ChevronRight } from "lucide-react"
-// import Link from "next/link"
-// import { motion } from "framer-motion"
-
-// export function PdfSection() {
-//   return (
-//     <motion.section
-//       className="relative h-full"
-//       initial={{ opacity: 0, y: 24 }}
-//       animate={{ opacity: 1, y: 0 }}
-//       transition={{ duration: 0.6, ease: "easeOut" }}
-//     >
-//       {/* Background gradient */}
-//       <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-orange-500/10 to-transparent rounded-xl" />
-
-//       <div className="relative z-10 flex flex-col h-full justify-between p-8 rounded-xl border border-white/10 bg-black/20 backdrop-blur-xl">
-//         {/* Header */}
-//         <div className="flex items-center gap-4 mb-6">
-//           <div className="p-3 bg-gradient-to-tr from-purple-500/20 to-orange-500/20 rounded-xl border border-purple-500/20">
-//             <BookOpen className="w-8 h-8 text-purple-400" />
-//           </div>
-//           <div>
-//             <h2 className="text-2xl font-bold text-white mb-1">PDF Learning Hub</h2>
-//             <p className="text-gray-400 text-sm">Interactive study materials</p>
-//           </div>
-//         </div>
-
-//         {/* Description */}
-//         <p className="text-gray-300 text-lg leading-relaxed mb-8">
-//           Transform any document into interactive study materials. Generate flashcards, create quizzes, and track your learning progress.
-//         </p>
-
-//         {/* Primary CTA */}
-//         <div className="flex justify-center">
-//           <span className="relative inline-block overflow-hidden rounded-full p-[1.5px] w-48">
-//             <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-//             <div className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-gray-950 text-xs font-medium backdrop-blur-3xl">
-//               <Link
-//                 href="/pdf"
-//                 className="inline-flex rounded-full text-center group items-center justify-center bg-gradient-to-tr from-zinc-300/5 via-purple-400/20 to-transparent text-gray-300 border-input border-[1px] hover:bg-gradient-to-tr hover:from-zinc-300/10 hover:via-purple-400/30 hover:to-transparent transition-all duration-300 py-3 px-6 text-sm font-medium w-full"
-//               >
-//                 <span>Read PDFs</span>
-//                 <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 duration-300" />
-//               </Link>
-//             </div>
-//           </span>
-//         </div>
-//       </div>
-//     </motion.section>
-//   )
-// }
