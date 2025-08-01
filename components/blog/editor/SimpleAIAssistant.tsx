@@ -305,16 +305,50 @@ export default function SimpleAIAssistant({
           </div>
         )}
 
+        {/* Error message when no content */}
+        {!currentContent.trim() && (
+          <div className="mb-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <div className="flex items-center gap-2 text-red-400 text-sm">
+              <span className="text-red-400">⚠️</span>
+              <span>Please add some text to generate suggestions</span>
+            </div>
+          </div>
+        )}
+
+        {/* Error message when custom tab has no prompt */}
+        {activeTab === 'custom' && !customPrompt.trim() && currentContent.trim() && (
+          <div className="mb-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+            <div className="flex items-center gap-2 text-yellow-400 text-sm">
+              <span className="text-yellow-400">💡</span>
+              <span>Please enter a custom prompt to continue</span>
+            </div>
+          </div>
+        )}
+
         {/* Generate button */}
         <Button
           onClick={() => handleGetSuggestions(activeTab)}
           disabled={loading || !currentContent.trim() || (activeTab === 'custom' && !customPrompt.trim())}
-          className="w-full mb-3 bg-purple-600 hover:bg-purple-700 text-white text-sm py-2"
+          className={`w-full mb-3 text-sm py-2 transition-all duration-200 ${
+            loading || !currentContent.trim() || (activeTab === 'custom' && !customPrompt.trim())
+              ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+              : 'bg-purple-600 hover:bg-purple-700 text-white'
+          }`}
         >
           {loading ? (
             <>
               <Loader2 className="w-3 h-3 mr-2 animate-spin" />
               Generating...
+            </>
+          ) : !currentContent.trim() ? (
+            <>
+              <Sparkles className="w-3 h-3 mr-2" />
+              Add text to continue
+            </>
+          ) : activeTab === 'custom' && !customPrompt.trim() ? (
+            <>
+              <Sparkles className="w-3 h-3 mr-2" />
+              Enter custom prompt
             </>
           ) : (
             <>

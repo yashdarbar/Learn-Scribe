@@ -218,11 +218,11 @@ export default function PdfLibraryPage() {
 
       {/* Header - Copied from dashboard */}
       <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-white/10 bg-black/50 backdrop-blur-xl">
-  <div className="text-base sm:text-lg lg:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-[linear-gradient(180deg,_#FFF_0%,_rgba(255,_255,_255,_0.7)_100%)] flex-1 min-w-0 pr-4">
-    <span className="truncate">
-      Welcome back, {user?.user_metadata?.first_name || user?.email || "User"}
-    </span>
-  </div>
+        <div className="text-base sm:text-lg lg:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-[linear-gradient(180deg,_#FFF_0%,_rgba(255,_255,_255,_0.7)_100%)] flex-1 min-w-0 pr-4">
+          <span className="truncate">
+            Learn-Scribe
+          </span>
+        </div>
 
   <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
     <div className="relative inline-block overflow-hidden rounded-full p-[1px]">
@@ -439,7 +439,6 @@ export default function PdfLibraryPage() {
 
               <p className="text-white mb-6">
                 Are you sure you want to delete <span className="font-semibold text-purple-300">"{pdfToDelete?.name}"</span>?
-                This will permanently remove the PDF and all associated data.
               </p>
 
               <div className="flex gap-3">

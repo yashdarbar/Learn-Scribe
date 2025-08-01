@@ -202,11 +202,11 @@ export default function MyBlogsPage() {
 
       {/* Header - Copied from dashboard with blue theme */}
       <header className="relative z-10 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-b border-white/10 bg-black/50 backdrop-blur-xl">
-  <div className="text-base sm:text-lg lg:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-[linear-gradient(180deg,_#FFF_0%,_rgba(255,_255,_255,_0.7)_100%)] flex-1 min-w-0 pr-4">
-    <span className="truncate">
-      Welcome back, {user?.user_metadata?.first_name || user?.email || "User"}
-    </span>
-  </div>
+        <div className="text-base sm:text-lg lg:text-xl font-bold tracking-tight bg-clip-text text-transparent bg-[linear-gradient(180deg,_#FFF_0%,_rgba(255,_255,_255,_0.7)_100%)] flex-1 min-w-0 pr-4">
+          <span className="truncate">
+            Learn-Scribe
+          </span>
+        </div>
 
   <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
     <div className="relative inline-block overflow-hidden rounded-full p-[1px]">
@@ -490,7 +490,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleView(blog.slug)}
-                  className="flex-1 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="flex-1 bg-gray-800/50 border-gray-500/30 text-gray-400 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white transition-all duration-300"
                 >
                   <Eye className="w-4 h-4 mr-1" />
                   View
@@ -506,7 +506,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleEdit(blog.id)}
-                  className="flex-1 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="flex-1 bg-gray-800/50 border-gray-500/30 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white text-gray-400 transition-all duration-300"
                 >
                   <Edit className="w-4 h-4 mr-1" />
                   Edit
@@ -523,7 +523,7 @@ export default function MyBlogsPage() {
                   size="sm"
                   onClick={() => handlePublishToggle(blog)}
                   disabled={actionLoading === blog.id}
-                  className="flex-1 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="flex-1 bg-gray-800/50 border-gray-500/30 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white text-gray-400 transition-all duration-300"
                 >
                   {actionLoading === blog.id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -544,7 +544,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => openDeleteDialog(blog)}
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/20 border-red-500/30 hover:border-red-500/50 transition-all duration-300"
+                  className="bg-gray-800/50 text-red-400 hover:text-red-500 hover:bg-gray-600/50 border-gray-500/30 hover:border-gray-400/50 transition-all duration-300"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -562,7 +562,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleView(blog.slug)}
-                  className="w-full border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="w-full bg-gray-800/50 border-gray-500/30 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white text-gray-400 transition-all duration-300"
                 >
                   <Eye className="w-4 h-4 mr-1" />
                   View
@@ -577,7 +577,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleEdit(blog.id)}
-                  className="w-full border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="w-full bg-gray-800/50 border-gray-500/30 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white text-gray-400 transition-all duration-300"
                 >
                   <Edit className="w-4 h-4 mr-1" />
                   Edit
@@ -593,7 +593,7 @@ export default function MyBlogsPage() {
                   size="sm"
                   onClick={() => handlePublishToggle(blog)}
                   disabled={actionLoading === blog.id}
-                  className="w-full border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="w-full bg-gray-800/50 border-gray-500/30 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white text-gray-400 transition-all duration-300"
                 >
                   {actionLoading === blog.id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -613,7 +613,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => openDeleteDialog(blog)}
-                  className="w-full text-red-400 hover:text-red-300 hover:bg-red-500/20 border-red-500/30 hover:border-red-500/50 transition-all duration-300"
+                  className="w-full bg-gray-800/50 text-red-400 hover:text-red-500 hover:bg-gray-600/50 border-gray-500/30 hover:border-gray-400/50 transition-all duration-300"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -631,7 +631,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleView(blog.slug)}
-                  className="flex-1 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="flex-1 bg-gray-800/50 border-gray-500/30 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white text-gray-400 transition-all duration-300"
                 >
                   <Eye className="w-4 h-4 mr-1" />
                   View
@@ -646,7 +646,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleEdit(blog.id)}
-                  className="flex-1 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="flex-1 bg-gray-800/50 border-gray-500/30 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white text-gray-400 t  ransition-all duration-300"
                 >
                   <Edit className="w-4 h-4 mr-1" />
                   Edit
@@ -662,7 +662,7 @@ export default function MyBlogsPage() {
                   size="sm"
                   onClick={() => handlePublishToggle(blog)}
                   disabled={actionLoading === blog.id}
-                  className="flex-1 border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-white transition-all duration-300"
+                  className="flex-1 bg-gray-800/50 border-gray-500/30 hover:bg-gray-600/50 hover:border-gray-400/50 hover:text-white text-gray-400 transition-all duration-300"
                 >
                   {actionLoading === blog.id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -682,7 +682,7 @@ export default function MyBlogsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => openDeleteDialog(blog)}
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/20 border-red-500/30 hover:border-red-500/50 transition-all duration-300"
+                  className="bg-gray-800/50 text-red-400 hover:text-red-500 hover:bg-gray-600/50 border-gray-500/30 hover:border-gray-400/50 transition-all duration-300"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

@@ -14,33 +14,47 @@ import {
   BlogContent,
 } from "@/types/blog";
 
-// Server action to get user info
-export async function getUserInfo(userId: string): Promise<ActionResult<{ id: string; email: string; user_metadata: any }>> {
+// Simple approach to get user info using author_id
+export async function getUserInfoSimple(userId: string): Promise<ActionResult<{ id: string; email: string; user_metadata: any }>> {
   try {
     const supabase = await createClient();
 
-    // Get user info from auth.users using the author_id
-    const { data: { user }, error } = await supabase.auth.admin.getUserById(userId);
-    console.log("userDAA", user);
+    // First try to get from profiles table
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    if (error || !user) {
+    if (profile && !profileError) {
+      console.log("Found user profile:", profile);
       return {
-        success: false,
-        error: 'User not found',
+        success: true,
         data: {
-          id: userId,
-          email: 'Unknown',
-          user_metadata: { first_name: 'Author' }
+          id: profile.id,
+          email: profile.email || 'Unknown',
+          user_metadata: {
+            first_name: profile.first_name || profile.full_name?.split(' ')[0] || 'Unknown',
+            last_name: profile.last_name || profile.full_name?.split(' ').slice(1).join(' ') || '',
+            full_name: profile.full_name || profile.first_name || 'Unknown Author'
+          }
         }
       };
     }
 
+    // If no profiles table or user not found, create a fallback
+    console.log("No profile found for user ID:", userId);
     return {
-      success: true,
+      success: false,
+      error: 'User profile not found',
       data: {
-        id: user.id,
-        email: user.email || 'Unknown',
-        user_metadata: user.user_metadata || { first_name: user.email?.split('@')[0] || 'Author' }
+        id: userId,
+        email: 'Unknown Author',
+        user_metadata: {
+          first_name: 'Unknown',
+          last_name: 'Author',
+          full_name: 'Unknown Author'
+        }
       }
     };
   } catch (error) {
@@ -50,8 +64,12 @@ export async function getUserInfo(userId: string): Promise<ActionResult<{ id: st
       error: 'Failed to get user info',
       data: {
         id: userId,
-        email: 'Unknown',
-        user_metadata: { first_name: 'Author' }
+        email: 'Unknown Author',
+        user_metadata: {
+          first_name: 'Unknown',
+          last_name: 'Author',
+          full_name: 'Unknown Author'
+        }
       }
     };
   }
@@ -59,12 +77,102 @@ export async function getUserInfo(userId: string): Promise<ActionResult<{ id: st
 
 // Helper function to get user info (for internal use)
 async function getUserInfoHelper(userId: string) {
-  const result = await getUserInfo(userId);
+  const result = await getUserInfoSimple(userId);
   return result.data || {
     id: userId,
     email: 'Unknown',
     user_metadata: { first_name: 'Author' }
   };
+}
+
+// Alternative approach to get user info without admin access
+export async function getUserInfoAlternative(userId: string): Promise<ActionResult<{ id: string; email: string; user_metadata: any }>> {
+  try {
+    const supabase = await createClient();
+
+    // Try to get user info from profiles table if it exists
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (profile && !profileError) {
+      console.log("Found user profile:", profile);
+      return {
+        success: true,
+        data: {
+          id: profile.id,
+          email: profile.email || 'Unknown',
+          user_metadata: {
+            first_name: profile.first_name || profile.full_name?.split(' ')[0] || 'Unknown',
+            last_name: profile.last_name || profile.full_name?.split(' ').slice(1).join(' ') || '',
+            full_name: profile.full_name || profile.first_name || 'Unknown Author'
+          }
+        }
+      };
+    }
+
+    // Fallback: try to get from auth.users with admin access
+    try {
+      const { data: { user }, error } = await supabase.auth.admin.getUserById(userId);
+
+      if (user && !error) {
+        console.log("Found user via admin:", user);
+        const userMetadata = user.user_metadata || {};
+        const firstName = userMetadata.first_name || userMetadata.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Unknown';
+        const lastName = userMetadata.last_name || userMetadata.full_name?.split(' ').slice(1).join(' ') || '';
+        const fullName = userMetadata.full_name || `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || 'Unknown Author';
+
+        return {
+          success: true,
+          data: {
+            id: user.id,
+            email: user.email || 'Unknown',
+            user_metadata: {
+              first_name: firstName,
+              last_name: lastName,
+              full_name: fullName,
+              ...userMetadata
+            }
+          }
+        };
+      }
+    } catch (adminError) {
+      console.log("Admin access failed, using fallback");
+    }
+
+    // Final fallback
+    console.log("Using fallback user data for ID:", userId);
+    return {
+      success: false,
+      error: 'User not found',
+      data: {
+        id: userId,
+        email: 'Unknown Author',
+        user_metadata: {
+          first_name: 'Unknown',
+          last_name: 'Author',
+          full_name: 'Unknown Author'
+        }
+      }
+    };
+  } catch (error) {
+    console.error('Error getting user info:', error);
+    return {
+      success: false,
+      error: 'Failed to get user info',
+      data: {
+        id: userId,
+        email: 'Unknown Author',
+        user_metadata: {
+          first_name: 'Unknown',
+          last_name: 'Author',
+          full_name: 'Unknown Author'
+        }
+      }
+    };
+  }
 }
 
 // Core CRUD operations
@@ -293,11 +401,15 @@ export async function getBlogBySlug(slug: string): Promise<ActionResult<BlogWith
     }
 
     // Get author info
-    const authorResult = await getUserInfo(blog.author_id);
+    const authorResult = await getUserInfoSimple(blog.author_id);
     const author = authorResult.data || {
       id: blog.author_id,
-      email: 'Unknown',
-      user_metadata: { first_name: 'Author' }
+      email: 'Unknown Author',
+      user_metadata: {
+        first_name: 'Unknown',
+        last_name: 'Author',
+        full_name: 'Unknown Author'
+      }
     };
 
     // Increment view count
@@ -350,7 +462,7 @@ export async function getBlogById(id: string): Promise<ActionResult<BlogWithDeta
       .limit(1);
 
     // Get author info
-    const author = await getUserInfoHelper(blog.author_id);
+    const author = await getUserInfoSimple(blog.author_id);
 
     const blogWithDetails: BlogWithDetails = {
       ...blog,
@@ -411,7 +523,7 @@ export async function getPublishedBlogs(filters?: BlogFilters): Promise<ActionRe
           .limit(1);
 
         // Get author info
-        const author = await getUserInfoHelper(blog.author_id);
+        const author = await getUserInfoSimple(blog.author_id);
 
         return {
           ...blog,

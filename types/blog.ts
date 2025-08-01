@@ -21,6 +21,8 @@ export interface BlogWithDetails extends Blog {
     user_metadata?: {
       first_name?: string;
       last_name?: string;
+      full_name?: string;
+      [key: string]: any; // Allow additional metadata properties
     };
   };
   category?: BlogCategory;

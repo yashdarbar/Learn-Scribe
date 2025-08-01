@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Loader2, Save, Sparkles, BookOpen, X, Play } from "lucide-react";
+import { Loader2, Save, Sparkles, BookOpen, X, Play, FileText } from "lucide-react";
 import { generateFlashcardsWithAuth, saveFlashcardSetWithAuth, Flashcard } from "@/lib/actions/flashcard-actions";
 import FlashcardStudyView from "./FlashcardStudyView";
 
@@ -12,7 +12,102 @@ interface FlashcardGeneratorProps {
   selectedText?: string;
   chatAction?: 'add' | 'explain' | 'summarize' | 'flashcards';
   onClearSelectedText?: () => void;
+  totalPages?: number; // ✅ NEW: Add total pages prop
 }
+
+// ✅ NEW: Function to extract text from PDF page using existing text layer
+const extractPageText = async (pageNumber: number): Promise<string> => {
+  try {
+    // Wait a bit for the PDF to be fully rendered
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Find the PDF viewer container - try multiple selectors
+    let pdfContainer = document.querySelector('.react-pdf__Page');
+    if (!pdfContainer) {
+      pdfContainer = document.querySelector('[data-page-number]');
+    }
+    if (!pdfContainer) {
+      pdfContainer = document.querySelector('.react-pdf__Page__canvas');
+    }
+
+    if (!pdfContainer) {
+      throw new Error('PDF viewer not found. Please ensure the PDF is loaded.');
+    }
+
+    // Find the text layer within the PDF page
+    let textLayer = pdfContainer.querySelector('.react-pdf__Page__textContent');
+    if (!textLayer) {
+      textLayer = pdfContainer.querySelector('.textLayer');
+    }
+    if (!textLayer) {
+      // Try to find any text elements directly
+      const textElements = pdfContainer.querySelectorAll('span, div');
+      if (textElements.length > 0) {
+        const textArray: string[] = [];
+        textElements.forEach((element) => {
+          const text = element.textContent?.trim();
+          if (text && text.length > 0) {
+            textArray.push(text);
+          }
+        });
+
+        if (textArray.length > 0) {
+          const fullText = textArray.join(' ').replace(/\s+/g, ' ').trim();
+          if (fullText) {
+            return fullText;
+          }
+        }
+      }
+      throw new Error('Text layer not found. The PDF might not have selectable text.');
+    }
+
+    // Get all text elements
+    const textElements = textLayer.querySelectorAll('span');
+    if (textElements.length === 0) {
+      // Try alternative selectors
+      const altTextElements = textLayer.querySelectorAll('div, p, span');
+      if (altTextElements.length === 0) {
+        throw new Error('No text elements found. The PDF might be image-based.');
+      }
+
+      const textArray: string[] = [];
+      altTextElements.forEach((element) => {
+        const text = element.textContent?.trim();
+        if (text && text.length > 0) {
+          textArray.push(text);
+        }
+      });
+
+      if (textArray.length === 0) {
+        throw new Error('No text content found. The PDF might be image-based or not fully loaded.');
+      }
+
+      const fullText = textArray.join(' ').replace(/\s+/g, ' ').trim();
+      return fullText;
+    }
+
+    // Extract text from all elements
+    const textArray: string[] = [];
+    textElements.forEach((element) => {
+      const text = element.textContent?.trim();
+      if (text && text.length > 0) {
+        textArray.push(text);
+      }
+    });
+
+    // Combine all text with proper spacing
+    const fullText = textArray.join(' ').replace(/\s+/g, ' ').trim();
+
+    if (!fullText) {
+      throw new Error('No text content found. The PDF might be image-based.');
+    }
+
+    return fullText;
+  } catch (error) {
+    console.error('Error extracting page text:', error);
+    throw new Error('Failed to extract text from page. Please ensure the PDF is fully loaded and contains selectable text.');
+  }
+};
 
 // ✅ UPDATED: Responsive Flashcard Preview Component
 const FlashcardPreview: React.FC<{
@@ -157,7 +252,8 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   docTitle,
   selectedText,
   chatAction,
-  onClearSelectedText
+  onClearSelectedText,
+  totalPages
 }) => {
   const [content, setContent] = useState("");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -173,6 +269,10 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     title: ""
   });
   const [isFlashcardsSaved, setIsFlashcardsSaved] = useState(false);
+
+  // ✅ NEW: Page input state for text extraction
+  const [pageInput, setPageInput] = useState("");
+  const [isExtractingText, setIsExtractingText] = useState(false);
 
   // ✅ NEW: Handle selectedText prop for context-aware text selection
   useEffect(() => {
@@ -234,6 +334,61 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
     handleTextareaResize();
+  };
+
+  // ✅ NEW: Handle page text extraction
+  const handleExtractPageText = async () => {
+    if (!pageInput.trim()) {
+      setError("Please enter a valid page number.");
+      return;
+    }
+
+    const pageNum = parseInt(pageInput);
+    if (isNaN(pageNum) || pageNum < 1 || (totalPages && pageNum > totalPages)) {
+      setError(`Please enter a valid page number between 1 and ${totalPages || 'unknown'}.`);
+      return;
+    }
+
+    setIsExtractingText(true);
+    setError(null);
+
+    try {
+      // First, navigate to the specified page if it's different from current page
+      if (pageNum !== pageNumber) {
+        // Dispatch a custom event to notify the parent component to change page
+        const pageChangeEvent = new CustomEvent('changePage', {
+          detail: { page: pageNum }
+        });
+        window.dispatchEvent(pageChangeEvent);
+
+        // Wait for the page to load
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      const extractedText = await extractPageText(pageNum);
+
+      if (extractedText.trim()) {
+        setContent(extractedText);
+
+        // Focus the textarea and move cursor to end
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(extractedText.length, extractedText.length);
+        }
+
+        // Auto-resize textarea
+        handleTextareaResize();
+
+        console.log(`✅ Extracted text from page ${pageNum}:`, extractedText.substring(0, 100) + '...');
+      } else {
+        setError(`No text found on page ${pageNum}.`);
+      }
+    } catch (err) {
+      setError("Failed to extract text from the specified page. Please try again.");
+      console.error('Text extraction error:', err);
+    } finally {
+      setIsExtractingText(false);
+    }
   };
 
   const handleGenerate = async () => {
@@ -336,6 +491,87 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
     <div className="flex flex-col h-full">
       {!showPreview ? (
         <>
+          {/* ✅ NEW: Page Input Section */}
+          <div className="flex-shrink-0 mb-3 sm:mb-4">
+            <div className="bg-black/20 border border-white/10 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400 flex-shrink-0" />
+                <h4 className="text-sm sm:text-base font-medium text-white">Extract Page Text</h4>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <div className="flex-1">
+                  <input
+                    type="number"
+                    min="1"
+                    max={totalPages || undefined}
+                    value={pageInput}
+                    onChange={(e) => setPageInput(e.target.value)}
+                    placeholder={`Enter page number (1-${totalPages || '?'})`}
+                    className="w-full px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+                  />
+                </div>
+                <button
+                  onClick={handleExtractPageText}
+                  disabled={!pageInput.trim() || isExtractingText}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded-lg font-medium text-sm"
+                >
+                  {isExtractingText ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="hidden sm:inline">Extracting...</span>
+                      <span className="sm:hidden">Extract...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-4 h-4" />
+                      <span className="hidden sm:inline">Extract Text</span>
+                      <span className="sm:hidden">Extract</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={async () => {
+                    setPageInput(pageNumber.toString());
+                    setIsExtractingText(true);
+                    setError(null);
+
+                    try {
+                      const extractedText = await extractPageText(pageNumber);
+                      if (extractedText.trim()) {
+                        setContent(extractedText);
+                        if (textareaRef.current) {
+                          textareaRef.current.focus();
+                          textareaRef.current.setSelectionRange(extractedText.length, extractedText.length);
+                        }
+                        handleTextareaResize();
+                        console.log(`✅ Extracted text from current page ${pageNumber}:`, extractedText.substring(0, 100) + '...');
+                      } else {
+                        setError(`No text found on current page ${pageNumber}.`);
+                      }
+                    } catch (err) {
+                      setError("Failed to extract text from current page. Please try again.");
+                      console.error('Text extraction error:', err);
+                    } finally {
+                      setIsExtractingText(false);
+                    }
+                  }}
+                  disabled={isExtractingText}
+                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded text-xs"
+                >
+                  <FileText className="w-3 h-3" />
+                  <span>Current Page ({pageNumber})</span>
+                </button>
+                {totalPages && (
+                  <span className="text-xs text-gray-400">
+                    Total pages: {totalPages}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* ✅ UPDATED: Content Area with More Height */}
           <div className="flex-1 flex flex-col space-y-3 sm:space-y-4 min-h-0">
             {/* ✅ UPDATED: Responsive Content Input */}
@@ -347,7 +583,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
                   rows={4}
                   maxLength={5000}
                   className="w-full h-full min-h-[120px] sm:min-h-[200px] resize-none rounded-lg bg-black/40 border border-white/10 px-2 sm:px-3 py-2 sm:py-3 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 text-xs sm:text-sm transition custom-scrollbar"
-                  placeholder="Paste the page content here..."
+                  placeholder="Paste the page content here or use the page extractor above..."
                   value={content}
                   onChange={handleContentChange}
                   disabled={isGenerating}

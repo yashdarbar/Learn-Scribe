@@ -305,7 +305,7 @@ const PDFViewerWithSelection: React.FC<PDFViewerWithSelectionProps> = ({
     setLoading(false);
   }, [retryCount]);
 
-  // ✅ ENHANCED: Text selection handler with debouncing
+  // ✅ ENHANCED: Text selection handler with debouncing - PDF ONLY
   useEffect(() => {
     let selectionTimeout: NodeJS.Timeout | null = null;
 
@@ -329,16 +329,37 @@ const PDFViewerWithSelection: React.FC<PDFViewerWithSelectionProps> = ({
             const range = selection.getRangeAt(0);
             const rect = range.getBoundingClientRect();
 
-            if (containerRef.current) {
-              const containerRect = containerRef.current.getBoundingClientRect();
-              const x = rect.left - containerRect.left + rect.width / 2;
-              const y = rect.top - containerRect.top - 40;
+                         // ✅ NEW: Check if selection is within PDF container
+             if (containerRef.current) {
+               const containerRect = containerRef.current.getBoundingClientRect();
 
-              // Only call if position is valid
-              if (x >= 0 && y >= 0) {
-                onTextSelect(text, { x, y });
-              }
-            }
+               // Check if the selection is within the PDF container bounds
+               const isWithinContainer =
+                 rect.left >= containerRect.left &&
+                 rect.right <= containerRect.right &&
+                 rect.top >= containerRect.top &&
+                 rect.bottom <= containerRect.bottom;
+
+               // ✅ NEW: Check if selection is in the controls area (bottom area)
+               const controlsHeight = 80; // Approximate height of controls area
+               const isInControlsArea =
+                 rect.bottom >= (containerRect.bottom - controlsHeight) &&
+                 rect.bottom <= containerRect.bottom;
+
+               // ✅ NEW: Only process selection if it's within PDF container AND not in controls area
+               if (isWithinContainer && !isInControlsArea) {
+                 const x = rect.left - containerRect.left + rect.width / 2;
+                 const y = rect.top - containerRect.top - 40;
+
+                 // Only call if position is valid
+                 if (x >= 0 && y >= 0) {
+                   onTextSelect(text, { x, y });
+                 }
+               } else {
+                 // Selection is outside PDF container or in controls area, clear it
+                 onTextSelect("", { x: 0, y: 0 });
+               }
+             }
           } catch (error) {
             console.error('Selection error:', error);
             onTextSelect("", { x: 0, y: 0 });

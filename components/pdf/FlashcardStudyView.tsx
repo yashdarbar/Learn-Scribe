@@ -200,9 +200,9 @@ export const FlashcardStudyView: React.FC<FlashcardStudyViewProps> = ({
                       <span className="text-xs bg-purple-600/50 text-purple-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                         {flashcards[currentIndex].difficulty_level || 'medium'}
                       </span>
-                      <span className="text-xs bg-blue-600/50 text-blue-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
+                      {/* <span className="text-xs bg-blue-600/50 text-blue-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                         {flashcards[currentIndex].card_type || 'qa'}
-                      </span>
+                      </span> */}
                     </div>
                   </motion.div>
                 )}

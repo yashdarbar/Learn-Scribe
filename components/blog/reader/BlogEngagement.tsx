@@ -147,22 +147,30 @@ export default function BlogEngagement({
         </div>
       </div>
 
-      {/* Author section */}
+      Author section
       <div className="bg-black/20 border border-white/10 rounded-lg p-6">
         <div className="flex items-start gap-4">
           <Avatar className="w-12 h-12">
             <span className="text-lg font-semibold text-black">
-              {blog.author.user_metadata?.first_name?.[0] || blog.author.email?.[0] || 'U'}
+              {blog.author.user_metadata?.first_name?.[0] ||
+               blog.author.email?.[0] || 'U'}
             </span>
           </Avatar>
 
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-white mb-1">
-              {blog.author.user_metadata?.first_name || blog.author.email}
+              {blog.author.user_metadata?.first_name ||
+               blog.author.email ||
+               'Unknown Author'}
             </h3>
-            <p className="text-gray-400 text-sm mb-3">
+            <p className="text-gray-400 text-sm mb-2">
               Author of this blog post
             </p>
+            {blog.author.user_metadata?.first_name && blog.author.user_metadata?.last_name && (
+              <p className="text-gray-500 text-xs">
+                {blog.author.user_metadata.first_name} {blog.author.user_metadata.last_name}
+              </p>
+            )}
             {/* <Button variant="default" size="sm">
               <User className="w-4 h-4 mr-2" />
               View Profile

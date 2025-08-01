@@ -38,15 +38,22 @@ export async function generateFlashcardsWithAuth(content: string, pdfId: string,
     const model = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `Generate exactly 5 flashcards from the following content.
-Return ONLY a valid JSON object with no markdown formatting, code blocks, or additional text.
+Return ONLY a properly formatted markdown file with no additional text or code blocks.
 
-Format: {
-  "flashcard_title": "A concise, descriptive title for this flashcard set based on the content",
-  "flashcards": [
-    {"question": "...", "answer": "..."},
-    {"question": "...", "answer": "..."}
-  ]
-}
+Format:
+# [Flashcard Title]
+
+## Question 1
+**Q:** [Question text]
+
+**A:** [Detailed answer with 2-3 lines of descriptive content]
+
+## Question 2
+**Q:** [Question text]
+
+**A:** [Detailed answer with 2-3 lines of descriptive content]
+
+[Continue for all 5 questions...]
 
 Content: ${content}
 
@@ -54,20 +61,22 @@ Requirements:
 - Generate a descriptive flashcard title (3-8 words) based on the main topic
 - Exactly 5 flashcards
 - Mix of factual, conceptual, and application questions
-- Clear, concise questions and answers
-- Return only the JSON object, no other text or formatting`;
+- Clear, concise questions
+- Detailed, descriptive answers with at least 2-3 lines of content
+- Each answer should provide comprehensive explanations, examples, or context
+- Return only the markdown formatted content, no other text or formatting`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    // Parse the JSON response with robust error handling
+    // Parse the markdown response with robust error handling
     let flashcardData: { flashcard_title: string; flashcards: Flashcard[] };
     try {
       let cleanedText = text.trim();
 
       // Remove various markdown code block formats
-      const codeBlockRegex = /^```(?:json)?\s*([\s\S]*?)\s*```$/;
+      const codeBlockRegex = /^```(?:markdown)?\s*([\s\S]*?)\s*```$/;
       const match = cleanedText.match(codeBlockRegex);
 
       if (match) {
@@ -77,39 +86,92 @@ Requirements:
       // Remove any remaining backticks
       cleanedText = cleanedText.replace(/^`+|`+$/g, '').trim();
 
-      // Parse the cleaned JSON
-      flashcardData = JSON.parse(cleanedText);
+      // Parse markdown to extract title and flashcards
+      const lines = cleanedText.split('\n');
+      let flashcardTitle = `Flashcards - Page ${pageNumber}`;
+      const flashcards: Flashcard[] = [];
+      let currentQuestion = '';
+      let currentAnswer = '';
+      let inAnswer = false;
+      let questionCount = 0;
 
-      // Validate the structure
-      if (!flashcardData.flashcards || !Array.isArray(flashcardData.flashcards)) {
-        throw new Error("Invalid flashcards format");
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        // Extract title from first # heading
+        if (line.startsWith('# ') && !line.startsWith('## ')) {
+          flashcardTitle = line.substring(2).trim();
+          continue;
+        }
+
+        // Start of a new question (## Question X)
+        if (line.startsWith('## Question ') || line.startsWith('## ')) {
+          // Save previous question if exists
+          if (currentQuestion && currentAnswer) {
+            flashcards.push({
+              question: currentQuestion.trim(),
+              answer: currentAnswer.trim(),
+              difficulty_level: 'medium',
+              card_type: 'qa'
+            });
+            questionCount++;
+          }
+
+          currentQuestion = '';
+          currentAnswer = '';
+          inAnswer = false;
+          continue;
+        }
+
+        // Question line
+        if (line.startsWith('**Q:**')) {
+          currentQuestion = line.substring(6).trim(); // Remove "**Q:**" (6 characters)
+          continue;
+        }
+
+        // Answer line
+        if (line.startsWith('**A:**')) {
+          currentAnswer = line.substring(6).trim(); // Remove "**A:**" (6 characters)
+          inAnswer = true;
+          continue;
+        }
+
+        // Continue answer content
+        if (inAnswer && line) {
+          currentAnswer += '\n' + line;
+        }
+      }
+
+      // Add the last question
+      if (currentQuestion && currentAnswer) {
+        flashcards.push({
+          question: currentQuestion.trim(),
+          answer: currentAnswer.trim(),
+          difficulty_level: 'medium',
+          card_type: 'qa'
+        });
+        questionCount++;
       }
 
       // Validate the response
-      if (flashcardData.flashcards.length !== 5) {
-        throw new Error(`Expected exactly 5 flashcards, received ${flashcardData.flashcards.length}`);
+      if (flashcards.length !== 5) {
+        throw new Error(`Expected exactly 5 flashcards, received ${flashcards.length}`);
       }
 
       // Validate each flashcard structure
-      flashcardData.flashcards.forEach((card, index) => {
+      flashcards.forEach((card, index) => {
         if (!card.question || !card.answer) {
           throw new Error(`Flashcard ${index + 1} missing question or answer`);
         }
+        if (card.answer.length < 50) {
+          throw new Error(`Flashcard ${index + 1} answer is too short. Expected at least 50 characters, got ${card.answer.length}`);
+        }
       });
-
-      // Add default values for missing properties
-      const flashcards = flashcardData.flashcards.map((card, index) => ({
-        question: card.question,
-        answer: card.answer,
-        difficulty_level: card.difficulty_level || 'medium',
-        card_type: card.card_type || 'qa',
-        card_order: index + 1
-      }));
 
       return {
         success: true,
         flashcards: flashcards,
-        flashcard_title: flashcardData.flashcard_title || `Flashcards - Page ${pageNumber}`
+        flashcard_title: flashcardTitle
       };
 
     } catch (parseError) {

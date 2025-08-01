@@ -97,6 +97,22 @@ export default function PDFViewerPage() {
     setActiveChatContext(activeTabNew);
   }, [activeTabNew]);
 
+  // ✅ NEW: Listen for page change events from FlashcardGenerator
+  useEffect(() => {
+    const handlePageChange = (event: CustomEvent) => {
+      const newPage = event.detail.page;
+      if (newPage && newPage >= 1 && newPage <= totalPages) {
+        setPage(newPage);
+      }
+    };
+
+    window.addEventListener('changePage', handlePageChange as EventListener);
+
+    return () => {
+      window.removeEventListener('changePage', handlePageChange as EventListener);
+    };
+  }, [totalPages]);
+
   // ✅ NEW: Auto-open chat on desktop, keep closed on mobile
   useEffect(() => {
     const handleResize = () => {
@@ -661,6 +677,7 @@ export default function PDFViewerPage() {
                   selectedText={activeTabNew === 'flashcards' ? pendingChatText || undefined : undefined}
                   chatAction={activeTabNew === 'flashcards' ? chatAction || undefined : undefined}
                   onClearSelectedText={handleChatTextProcessed}
+                  totalPages={totalPages}
                 />
               </div>
             ) : activeTabNew === 'quiz' ? (
@@ -807,6 +824,7 @@ export default function PDFViewerPage() {
                     selectedText={activeTabNew === 'flashcards' ? pendingChatText || undefined : undefined}
                     chatAction={activeTabNew === 'flashcards' ? chatAction || undefined : undefined}
                     onClearSelectedText={handleChatTextProcessed}
+                    totalPages={totalPages}
                   />
                 </div>
               ) : activeTabNew === 'quiz' ? (
