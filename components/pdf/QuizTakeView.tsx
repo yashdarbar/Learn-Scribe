@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, X, Clock, CheckCircle, XCircle, Trophy, RotateCcw } from "lucide-react";
 import { QuizQuestion } from "@/lib/actions/quiz-actions";
 import { saveQuizAttemptWithAuth } from "@/lib/actions/quiz-actions";
+import toast from "react-hot-toast";
 
 interface QuizTakeViewProps {
   questions: QuizQuestion[];
@@ -14,6 +15,7 @@ interface QuizTakeViewProps {
   docTitle?: string;
   content?: string;
   onSaveQuiz?: (title: string) => Promise<{ success: boolean; error?: string }>;
+  isAlreadySaved?: boolean; // NEW: Flag to indicate if quiz is already saved
 }
 
 export const QuizTakeView: React.FC<QuizTakeViewProps> = ({
@@ -25,7 +27,8 @@ export const QuizTakeView: React.FC<QuizTakeViewProps> = ({
   pageNumber,
   docTitle,
   content,
-  onSaveQuiz
+  onSaveQuiz,
+  isAlreadySaved = false
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -112,26 +115,36 @@ export const QuizTakeView: React.FC<QuizTakeViewProps> = ({
         }
       });
 
-      // Save quiz attempt if we have a real quiz set ID
-      if (quizSetId && quizSetId !== 'temp-quiz-id') {
-        const result = await saveQuizAttemptWithAuth(
-          quizSetId,
-          score,
-          questions.length,
-          timeElapsed,
-          answers
-        );
+      // Save quiz attempt if we have a real quiz set ID (not temporary or saved-quiz-id)
+      if (quizSetId && quizSetId !== 'temp-quiz-id' && quizSetId !== 'saved-quiz-id') {
+        try {
+          const result = await saveQuizAttemptWithAuth(
+            quizSetId,
+            score,
+            questions.length,
+            timeElapsed,
+            answers
+          );
 
-        if (!result.success) {
-          console.error('Failed to save quiz attempt:', result.error);
+          if (!result.success) {
+            console.error('Failed to save quiz attempt:', result.error);
+          }
+        } catch (error) {
+          console.error('Error saving quiz attempt:', error);
+          // Don't throw the error, just log it and continue
         }
       }
 
-      // Auto-save the quiz if onSaveQuiz function is provided and no quizSetId exists
-      if (!quizSetId && onSaveQuiz && title) {
+      // Auto-save the quiz if onSaveQuiz function is provided and quizSetId indicates it's not saved yet
+      // Only save if the quiz hasn't been saved before (quizSetId === undefined or 'temp-quiz-id' means it's a temporary quiz)
+      // Don't save if quizSetId is 'saved-quiz-id' (already saved)
+      if ((quizSetId === undefined || quizSetId === 'temp-quiz-id') && onSaveQuiz && title && !isAlreadySaved) {
+        console.log('Auto-saving quiz because quizSetId is undefined or temp-quiz-id');
         try {
           const saveResult = await onSaveQuiz(title);
           if (saveResult.success) {
+            // ✅ NEW: Show success toast only if this is the first save
+            toast.success("Saved to My sets");
             console.log('Quiz auto-saved successfully!');
           } else {
             console.error('Failed to auto-save quiz:', saveResult.error);
@@ -139,12 +152,17 @@ export const QuizTakeView: React.FC<QuizTakeViewProps> = ({
         } catch (error) {
           console.error('Error auto-saving quiz:', error);
         }
+      } else {
+        console.log('Not auto-saving quiz. quizSetId:', quizSetId, 'onSaveQuiz:', !!onSaveQuiz, 'title:', !!title, 'isAlreadySaved:', isAlreadySaved);
+        if (quizSetId === 'saved-quiz-id' || isAlreadySaved) {
+          console.log('Quiz is already saved, skipping auto-save');
+        }
       }
 
       // Always show results regardless of save success
       setShowResults(true);
     } catch (error) {
-      console.error('Error saving quiz attempt:', error);
+      console.error('Error in quiz submission:', error);
       // Still show results even if save fails
       setShowResults(true);
     } finally {
@@ -179,6 +197,11 @@ export const QuizTakeView: React.FC<QuizTakeViewProps> = ({
       }
     });
     return { score, percentage: Math.round((score / questions.length) * 100) };
+  };
+
+  // Helper function to check if all questions are answered
+  const areAllQuestionsAnswered = () => {
+    return questions.every((_, index) => answers[index.toString()]);
   };
 
   const { score, percentage } = calculateScore();
@@ -386,6 +409,14 @@ export const QuizTakeView: React.FC<QuizTakeViewProps> = ({
           />
         </div>
 
+        {/* Answer Progress Indicator */}
+        <div className="flex justify-between items-center mb-4 text-xs text-gray-400">
+          <span>Question {currentIndex + 1} of {questions.length}</span>
+          <span>
+            {Object.keys(answers).length} of {questions.length} answered
+          </span>
+        </div>
+
         {/* Question */}
         <div
           key={currentIndex}
@@ -444,13 +475,17 @@ export const QuizTakeView: React.FC<QuizTakeViewProps> = ({
           {currentIndex === questions.length - 1 ? (
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 transition text-white rounded-lg font-medium text-sm sm:text-base"
+              disabled={isSubmitting || !answers[currentIndex.toString()]}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition text-white rounded-lg font-medium text-sm sm:text-base"
             >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   Submitting...
+                </>
+              ) : !answers[currentIndex.toString()] ? (
+                <>
+                  Select an answer
                 </>
               ) : (
                 <>

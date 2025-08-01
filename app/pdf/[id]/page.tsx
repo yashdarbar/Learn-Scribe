@@ -85,6 +85,20 @@ export default function PDFViewerPage() {
   // ✅ NEW: Context-aware text selection
   const [activeChatContext, setActiveChatContext] = useState<'chat' | 'flashcards' | 'quiz' | 'sets'>('chat');
 
+  // ✅ NEW: Persistent flashcard state across section switches
+  const [persistentFlashcards, setPersistentFlashcards] = useState<{
+    flashcards: any[];
+    title: string;
+    isSaved: boolean;
+  } | null>(null);
+
+  // ✅ NEW: Quiz persistence state
+  const [persistentQuiz, setPersistentQuiz] = useState<{
+    questions: any[];
+    title: string;
+    isSaved: boolean;
+  } | null>(null);
+
   const [isMounted, setIsMounted] = useState(false);
 
   // Mount detection
@@ -322,6 +336,52 @@ export default function PDFViewerPage() {
   const handleChatTextProcessed = () => {
     setPendingChatText(null);
     setChatAction(null);
+  };
+
+  // ✅ NEW: Handle flashcard persistence
+  const handleFlashcardGenerated = (flashcards: any[], title: string) => {
+    setPersistentFlashcards({
+      flashcards,
+      title,
+      isSaved: false
+    });
+  };
+
+  // ✅ NEW: Handle flashcard saved
+  const handleFlashcardSaved = () => {
+    if (persistentFlashcards) {
+      setPersistentFlashcards({
+        ...persistentFlashcards,
+        isSaved: true
+      });
+    }
+  };
+
+  // ✅ NEW: Handle flashcard clear
+  const handleFlashcardClear = () => {
+    setPersistentFlashcards(null);
+  };
+
+  // ✅ NEW: Quiz persistence handlers
+  const handleQuizGenerated = (questions: any[], title: string) => {
+    setPersistentQuiz({
+      questions,
+      title,
+      isSaved: false
+    });
+  };
+
+  const handleQuizSaved = () => {
+    if (persistentQuiz) {
+      setPersistentQuiz({
+        ...persistentQuiz,
+        isSaved: true
+      });
+    }
+  };
+
+  const handleQuizClear = () => {
+    setPersistentQuiz(null);
   };
 
   // ✅ REMOVED: handleClearSelectedText function (replaced by handleChatTextProcessed)
@@ -678,6 +738,10 @@ export default function PDFViewerPage() {
                   chatAction={activeTabNew === 'flashcards' ? chatAction || undefined : undefined}
                   onClearSelectedText={handleChatTextProcessed}
                   totalPages={totalPages}
+                  onFlashcardGenerated={handleFlashcardGenerated}
+                  onFlashcardSaved={handleFlashcardSaved}
+                  onFlashcardClear={handleFlashcardClear}
+                  persistentFlashcards={persistentFlashcards}
                 />
               </div>
             ) : activeTabNew === 'quiz' ? (
@@ -689,6 +753,11 @@ export default function PDFViewerPage() {
                   selectedText={activeTabNew === 'quiz' ? pendingChatText || undefined : undefined}
                   chatAction={activeTabNew === 'quiz' ? chatAction || undefined : undefined}
                   onClearSelectedText={handleChatTextProcessed}
+                  totalPages={totalPages}
+                  onQuizGenerated={handleQuizGenerated}
+                  onQuizSaved={handleQuizSaved}
+                  onQuizClear={handleQuizClear}
+                  persistentQuiz={persistentQuiz}
                 />
               </div>
             ) : activeTabNew === 'sets' ? (
@@ -825,6 +894,10 @@ export default function PDFViewerPage() {
                     chatAction={activeTabNew === 'flashcards' ? chatAction || undefined : undefined}
                     onClearSelectedText={handleChatTextProcessed}
                     totalPages={totalPages}
+                    onFlashcardGenerated={handleFlashcardGenerated}
+                    onFlashcardSaved={handleFlashcardSaved}
+                    onFlashcardClear={handleFlashcardClear}
+                    persistentFlashcards={persistentFlashcards}
                   />
                 </div>
               ) : activeTabNew === 'quiz' ? (
@@ -840,6 +913,11 @@ export default function PDFViewerPage() {
                     selectedText={activeTabNew === 'quiz' ? pendingChatText || undefined : undefined}
                     chatAction={activeTabNew === 'quiz' ? chatAction || undefined : undefined}
                     onClearSelectedText={handleChatTextProcessed}
+                    totalPages={totalPages}
+                    onQuizGenerated={handleQuizGenerated}
+                    onQuizSaved={handleQuizSaved}
+                    onQuizClear={handleQuizClear}
+                    persistentQuiz={persistentQuiz}
                   />
                 </div>
               ) : activeTabNew === 'sets' ? (

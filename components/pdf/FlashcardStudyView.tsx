@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, RotateCcw, X, Eye, EyeOff, Save, Loader2 } from "lucide-react";
 import { Flashcard, saveFlashcardSetWithAuth } from "@/lib/actions/flashcard-actions";
+import toast from "react-hot-toast";
 
 interface FlashcardStudyViewProps {
   flashcards: Flashcard[];
@@ -83,7 +84,9 @@ export const FlashcardStudyView: React.FC<FlashcardStudyViewProps> = ({
       );
 
       if (result.success) {
-        // You could add a success toast here
+        // ✅ NEW: Show success toast
+        toast.success("Saved to My sets");
+
         console.log("Flashcard set saved successfully!");
         setLocalIsSaved(true);
         // Don't close the study view, just mark as saved
