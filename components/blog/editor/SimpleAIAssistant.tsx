@@ -259,7 +259,7 @@ export default function SimpleAIAssistant({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0 text-gray-400 hover:text-white flex-shrink-0"
+            className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-800/50 flex-shrink-0"
           >
             <X className="w-4 h-4" />
           </Button>
