@@ -225,7 +225,7 @@ export default function BlogsPage() {
         <Button
           asChild
           variant="outline"
-          className="w-full sm:w-auto border-blue-500/30 hover:bg-blue-500/20 hover:border-blue-500/50 transition-all hover:text-white duration-300 px-3 sm:px-4"
+          className="w-full sm:w-auto border-gray-500/30 hover:bg-gray-500/20 hover:border-gray-500/50 transition-all hover:text-white duration-300 px-3 sm:px-4"
         >
           <Link href="/blogs/my-blogs">
             <User className="w-4 h-4 sm:mr-2" />

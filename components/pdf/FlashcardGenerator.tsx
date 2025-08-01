@@ -528,15 +528,7 @@ export const FlashcardGenerator: React.FC<FlashcardGeneratorProps> = ({
         }
 
         // ✅ NEW: Show success toast
-        toast.success("Saved to My sets", {
-          duration: 3000,
-          position: "bottom-right",
-          style: {
-            background: "#1f2937",
-            color: "#f9fafb",
-            border: "1px solid #374151",
-          },
-        });
+        toast.success("Saved to My sets");
 
         console.log("Flashcard set saved successfully!");
       } else {

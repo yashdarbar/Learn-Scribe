@@ -11,9 +11,9 @@ export function ChatHeader({ status = "Ready to help", onClear }: { status?: str
         <div className="font-bold text-lg text-white">Ask about this PDF</div>
         <div className="text-xs text-purple-300">{status}</div>
       </div>
-      <button className="p-2 rounded hover:bg-purple-900/20 transition" title="Clear chat" onClick={onClear}>
+      {/* <button className="p-2 rounded hover:bg-purple-900/20 transition" title="Clear chat" onClick={onClear}>
         <Trash2 className="w-5 h-5 text-gray-400" />
-      </button>
+      </button> */}
     </div>
   );
 }

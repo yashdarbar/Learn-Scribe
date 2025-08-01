@@ -641,7 +641,7 @@ export default function PDFViewerPage() {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <button
+              {/* <button
                 className="p-1.5 sm:p-2 rounded hover:bg-purple-900/20 transition"
                 title="Clear chat history"
                 onClick={() => {
@@ -649,7 +649,7 @@ export default function PDFViewerPage() {
                 }}
               >
                 <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-              </button>
+              </button> */}
               {/* Mobile close button */}
               <button
                 onClick={() => setChatOpen(false)}
