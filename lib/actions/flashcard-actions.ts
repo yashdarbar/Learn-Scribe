@@ -35,7 +35,7 @@ export async function generateFlashcardsWithAuth(content: string, pdfId: string,
     }
 
     const geminiClient = getGeminiClient();
-    const model = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = geminiClient.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `Generate exactly 5 flashcards from the following content.
 Return ONLY a properly formatted markdown file with no additional text or code blocks.

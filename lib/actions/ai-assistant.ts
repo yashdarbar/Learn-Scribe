@@ -92,7 +92,7 @@ Please provide a response that fits naturally with the existing content:`;
     }
 
     const geminiClient = getGeminiClient();
-    const model = geminiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = geminiClient.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const response = await model.generateContent({
       contents: [{
