@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 // import { supabaseBrowser } from '@/lib/supabase-browser'
 import { createClient } from '@/utils/supabase/client'
-import { User, Session } from '@supabase/auth-helpers-nextjs'
+import { User, Session } from '@supabase/supabase-js'
 import { AuthContextType } from '@/types/auth'
 
 const AuthContext = createContext<AuthContextType>({

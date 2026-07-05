@@ -1,9 +1,7 @@
 // lib/actions/pdf-upload.ts
 'use server'
 
-// import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { createClient } from '@/utils/supabase/server'
-import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
 export type UploadResult = {
@@ -17,8 +15,6 @@ export async function uploadPDF(formData: FormData): Promise<UploadResult> {
   try {
     console.log('🚀 Server Action: Starting PDF upload...')
 
-    // Create Supabase client
-    // const supabase = createServerComponentClient({ cookies })
     const supabase = await createClient()
 
     // Check authentication
